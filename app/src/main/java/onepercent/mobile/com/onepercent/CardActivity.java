@@ -65,7 +65,6 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
     ViewGroup mapViewContainer;
 
     // 편지 표시 임시 데이터
-    Double tepLo[][] = {{37.55467883886744,126.97060691739387},{37.55302870046419,126.9726446200341},{37.55333072900075,126.96974735368565},{37.55598023963206,126.97209125123605},{37.55554717631529,126.96971929605336},{37.55518700151674,126.97060671780628},{37.55617478407818,126.97179239811932},{37.555187012777466,126.97065198698641},{37.55521943630202,126.9706021781465},{37.554365360097385,126.9708831795083},{37.553525339890896,126.96972916774709},{37.5526210405713,126.97093365252373},{37.55586480299739,126.97163407138069},{37.554358156579696,126.97090128978422},{37.55347940872809,126.97356339877831}};
     HashMap<Integer, Item> mTagItemMap = new HashMap<Integer, Item>();
     int LETTER_SIZE = 0;
 
@@ -110,6 +109,15 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
 
 //          /* DB  */
         manager = new DBManager(this);
+
+
+//        manager.insertData1(new LetterInfo(0, "보내는 id", "보내는사람 이름", "내용", "도봉산역", 37.6896072, 127.0441583, 0), ctx);
+//        manager.insertData1(new LetterInfo(1,  "보내는 id", "보내는사람 이름", "내용", "도봉역", 37.6794452,127.0433323, 0), ctx);
+//        manager.insertData1(new LetterInfo(2, "보내는 id", "보내는사람 이름", "내용", "성신여대역", 37.5927242, 127.0143553, 0), ctx);
+//        manager.insertData1(new LetterInfo(3,   "보내는 id",   "보내는사람 이름",  "내용","성신여대" ,37.5913145,127.0199425,  0),ctx);
+//        manager.insertData1(new LetterInfo(4, "보내는 id", "보내는사람 이름", "내용", "상지초등학교", 37.493405, 126.763322, 0), ctx);
+//        manager.insertData1(new LetterInfo(5,   "보내는 id",   "보내는사람 이름",  "내용","우리집" ,   37.4915496,126.7542664,  0),ctx);
+
 
         LETTER_SIZE = manager.nonstateSize();
         arrayList = manager.selectAllstate();
@@ -165,6 +173,9 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
             poiItem.setCustomImageAutoscale(false);
             poiItem.setCustomImageAnchor(0.5f, 1.0f);
 
+
+
+
             mMapView.addPOIItem(poiItem);
             mTagItemMap.put(poiItem.getTag(), item);
 
@@ -182,7 +193,7 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
             LETTER_SIZE = manager.nonstateSize();
 
             mMapView.removeAllPOIItems();
-            letterCheck(latitude,longitude);
+            letterCheck(latitude,longitude); // 내주변 편지 체크
 
             MapPOIItem[] poiItems = mMapView.getPOIItems();
             if(poiItems.length>LETTER_SIZE)
@@ -197,7 +208,7 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
             item.address = last+"";
 
             poiItem.setItemName("Your location");
-            poiItem.setTag(last);
+            poiItem.setTag(last+1);
             MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(latitude, longitude);
             poiItem.setMapPoint(mapPoint);
             poiItem.setMarkerType(MapPOIItem.MarkerType.YellowPin);
@@ -213,6 +224,7 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
             gps.showSettingsAlert();
         }
     }
+
     // 내주변의 편지 체크하기
     public void letterCheck(double lati, double longi)
     {
@@ -240,12 +252,14 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
             item.context =  arrayList.get(i).context;
 
             MapPOIItem poiItem = new MapPOIItem();
-            poiItem.setItemName("from."+arrayList.get(i).send_name);
-            poiItem.setTag(i);
-            MapPoint mapPoint = MapPoint.mapPointWithGeoCoord( item.latitude, item.longitude);
-            poiItem.setMapPoint(mapPoint);
+
 
             if(getDistance(lati, longi, item.latitude, item.longitude) <= 500.0) {
+                poiItem.setItemName("possible");
+                poiItem.setTag(i);
+                MapPoint mapPoint = MapPoint.mapPointWithGeoCoord( item.latitude, item.longitude);
+                poiItem.setMapPoint(mapPoint);
+
                 poiItem.setMarkerType(MapPOIItem.MarkerType.CustomImage);
                 poiItem.setCustomImageBitmap(letter1);
                 poiItem.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
@@ -253,6 +267,11 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
             }
             else
             {
+                poiItem.setItemName("impossible");
+                        poiItem.setTag(i);
+                MapPoint mapPoint = MapPoint.mapPointWithGeoCoord( item.latitude, item.longitude);
+                poiItem.setMapPoint(mapPoint);
+
                 poiItem.setMarkerType(MapPOIItem.MarkerType.CustomImage);
                 poiItem.setCustomImageBitmap(letter);
                 poiItem.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
@@ -266,6 +285,25 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
 
         }
     }
+
+    // 비트맵 비교하기
+//    public boolean sameAs(Bitmap bitmap)
+//    {
+//        Bitmap original =  BitmapFactory.decodeResource(getResources(), R.drawable.letter1);
+//        original = Biㅁtmap.createScaledBitmap(original, 60, 75, true);
+//
+//        ByteBuffer bf1 = ByteBuffer.allocate(original.getHeight() * original.getRowBytes());
+//        original.copyPixelsToBuffer(bf1);
+//
+//        ByteBuffer bf2 = ByteBuffer.allocate(bitmap.getHeight() * bitmap.getRowBytes());
+//        bitmap.copyPixelsToBuffer(bf2);
+//
+//        return Arrays.equals(bf1.array(),bf2.array());
+//
+//
+//    }
+
+
 
     /******************* get distance method ************************/
     public Double getDistance(Double latitude_1, Double longitude_1, Double latitude_2, Double longitude_2)
@@ -360,22 +398,45 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
     @Override
     public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem, MapPOIItem.CalloutBalloonButtonType calloutBalloonButtonType) {
         final Item item = mTagItemMap.get(mapPOIItem.getTag());
-        Log.d("letter","Click");
+        Log.d("letter", "Click");
+
+//        Bitmap bit = mapPOIItem.getCustomImageBitmap();
+//        sameAs(bit)
         AlertDialog.Builder ab = new AlertDialog.Builder(ctx);
-        ab.setTitle("편지를 읽으시겠습니까?");
 
-        ab.setPositiveButton("ok", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                Toast.makeText(CardActivity.this, item.send_id+" "+item.send_name+" "+item.address+" "+item.context+" "+item.latitude+" "+item.longitude, Toast.LENGTH_SHORT).show();
-            }
-        });
+        if(mapPOIItem.getItemName().equals("possible")) //   (읽을 수 있음)
+        {
+           ab.setTitle("편지를 읽으시겠습니까?");
 
-        ab.setNegativeButton("cancle", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {            }
-        });
-        ab.show();
+            ab.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    Toast.makeText(CardActivity.this, item.send_id+" "+item.send_name+" "+item.address+" "+item.context+" "+item.latitude+" "+item.longitude, Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            ab.setNegativeButton("cancle", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {            }
+            });
+            ab.show();
+        }
+        else{ //   (읽을 수 없음)
+            ab.setTitle("거리가 멀어 읽을 수 없습니다.");
+            ab.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    // Toast.makeText(CardActivity.this, item.send_id+" "+item.send_name+" "+item.address+" "+item.context+" "+item.latitude+" "+item.longitude, Toast.LENGTH_SHORT).show();
+                }
+            });
+            ab.setNegativeButton("cancle", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                }
+            });
+        }
+
+
     }
 
 

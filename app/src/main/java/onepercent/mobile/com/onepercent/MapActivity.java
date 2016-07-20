@@ -31,6 +31,7 @@ import net.daum.mf.map.api.CameraUpdateFactory;
 import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapPointBounds;
+import net.daum.mf.map.api.MapReverseGeoCoder;
 import net.daum.mf.map.api.MapView;
 
 import java.io.BufferedReader;
@@ -56,8 +57,13 @@ import onepercent.mobile.com.onepercent.Model.User;
 import onepercent.mobile.com.onepercent.SQLite.DBManager;
 import onepercent.mobile.com.onepercent.SQLite.LetterInfo;
 
-public class MapActivity extends FragmentActivity implements MapView.MapViewEventListener, MapView.POIItemEventListener, View.OnClickListener, TextView.OnEditorActionListener {
+import static net.daum.mf.map.api.MapReverseGeoCoder.*;
+
+public class MapActivity extends FragmentActivity implements MapView.MapViewEventListener, MapView.POIItemEventListener, View.OnClickListener, TextView.OnEditorActionListener, ReverseGeoCodingResultListener {
     private static final String LOG_TAG = "SearchDemoActivity";
+
+
+
     public static Context ctx;
     // Map
     private MapView mMapView;
@@ -181,11 +187,12 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
                 break;
             case R.id.sendBtn: // 서버로 편지내용 전송
                 toContext  = contextEt.getText().toString();
-                String url = "http://117.17.142.139:8080/letter/insertLetter.do";
-               sendLetter(url, toId, toNickname, from_id, from_name, inAddress, toContext, inLatitude, inLongitude);
-                Log.d("letter", "sendLetter : " + from_id+" , " + from_name + " . " + inAddress + "!!");
+                Log.d("SUN", "sendLetter : " + from_id+" , " + from_name + " . " + inAddress + "!!");
+                manager.insertData2(new LetterInfo(0, toId, toNickname, toContext, inAddress, inLatitude, inLongitude, 0), ctx);
+                String url = "http://192.168.200.175:8080/letter/insertLetter.do";
+                sendLetter(url, toId, toNickname, from_id, from_name, inAddress, toContext, inLatitude, inLongitude);
                 // 내가 보낸 편지함에 저장
-                //  manager.insertData2(new LetterInfo(0, toId, toNickname, toContext, inAddress, inLatitude, inLongitude,0), ctx);
+
                 break;
 
         }
@@ -258,6 +265,7 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
                 item.title = "Your location";
                 item.latitude = latitude;
                 item.longitude = longitude;
+                item.address = "";
 
                 MapPOIItem poiItem = new MapPOIItem();
                 poiItem.setItemName(item.title);
@@ -267,9 +275,12 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
                 poiItem.setMarkerType(MapPOIItem.MarkerType.YellowPin);
                 mMapView.addPOIItem(poiItem);
 
+
                 mMapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(item.latitude, item.longitude), 2, true);
                 mTagItemMap.put(poiItem.getTag(), item);
                 GPS_CLICK = true;
+//                MapReverseGeoCoder mReverseGeoCoder = new MapReverseGeoCoder( MapApiConst.DAUM_MAPS_ANDROID_APP_API_KEY, mMapView.getMapCenterPoint(), MapActivity.this, MapActivity.this);
+//                mReverseGeoCoder.startFindingAddress();
 
             }
             else { // 이미 마커가 추가됬으므로 중심 만 바꿔주기
@@ -282,6 +293,8 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
             gps.showSettingsAlert();
         }
     }
+
+
     class CustomCalloutBalloonAdapter implements CalloutBalloonAdapter {
 
         private final View mCalloutBalloon;
@@ -294,6 +307,7 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
         public View getCalloutBalloon(MapPOIItem poiItem) {
             if (poiItem == null) return null;
             Item item = mTagItemMap.get(poiItem.getTag());
+            Log.d("SUN","Balloon Tag() : "+poiItem.getTag());
             if (item == null) return null;
             ImageView imageViewBadge = (ImageView) mCalloutBalloon.findViewById(R.id.badge);
             TextView textViewTitle = (TextView) mCalloutBalloon.findViewById(R.id.title);
@@ -412,8 +426,9 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
     }
 
     @Override
-    public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem, MapPOIItem.CalloutBalloonButtonType calloutBalloonButtonType) {
+    public void onCalloutBalloonOfPOIItemTouched(MapView mapView, final MapPOIItem mapPOIItem, MapPOIItem.CalloutBalloonButtonType calloutBalloonButtonType) {
         final Item item = mTagItemMap.get(mapPOIItem.getTag());
+        Log.d("SUN", "TAG() : "+mapPOIItem.getTag());
         if(LOCATION_SELECT==false) {
             AlertDialog.Builder ab = new AlertDialog.Builder(ctx);
             ab.setTitle("Location");
@@ -422,11 +437,12 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     mMapView.removeAllPOIItems(); // 기존 검색 결과 삭제
-                    Bitmap letter =  BitmapFactory.decodeResource(getResources(), R.drawable.letter);
-                    letter = Bitmap.createScaledBitmap(letter,96,120, true);
+                    Bitmap letter = BitmapFactory.decodeResource(getResources(), R.drawable.letter);
+                    letter = Bitmap.createScaledBitmap(letter, 96, 120, true);
+
                     MapPOIItem poiItem = new MapPOIItem();
-                    poiItem.setItemName(item.title);
-                    poiItem.setTag(1);
+                    poiItem.setItemName("send letter");
+                    poiItem.setTag(mapPOIItem.getTag());
                     MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(item.latitude, item.longitude);
                     poiItem.setMapPoint(mapPoint);
                     poiItem.setMarkerType(MapPOIItem.MarkerType.CustomImage);
@@ -444,8 +460,12 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
                     searchLayout.setVisibility(View.GONE);
                     writerLayout.setVisibility(View.VISIBLE);
                     //hideSoftKeyboard();
-
-                    inAddress = item.address;
+                    if (item.address.equals("")) {
+                        MapReverseGeoCoder mReverseGeoCoder = new MapReverseGeoCoder(MapApiConst.DAUM_MAPS_ANDROID_APP_API_KEY, mapPoint, MapActivity.this, MapActivity.this);
+                        mReverseGeoCoder.startFindingAddress();
+                    }
+                    else
+                        inAddress = item.address;
                     inLatitude = item.latitude;
                     inLongitude = item.longitude;
                     toEt.setText(toNickname);
@@ -505,6 +525,18 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
 
 
         return response_msg;
+    }
+
+    @Override
+    public void onReverseGeoCoderFoundAddress(MapReverseGeoCoder mapReverseGeoCoder, String result) {
+        inAddress = result;
+        Log.d("SUN","ADDRESS : "+result);
+    }
+
+    @Override
+    public void onReverseGeoCoderFailedToFindAddress(MapReverseGeoCoder mapReverseGeoCoder) {
+        inAddress = " ";
+        Log.d("SUN","ADDRESS : fail");
     }
 
 

@@ -124,7 +124,7 @@ public class FaceLogin extends Activity {
                                                         User user = User.getInstance();
                                                         user.setUser_id(id);
                                                         user.setUser_name(name);
-                                                        String url = "http://117.17.142.139:8080/letter/insertUser.do";
+                                                        String url = "http://192.168.200.175:8080/letter/insertUser.do";
                                                         post_profile(url, id, name);
                                                         Intent intent = new Intent(FaceLogin.this, CardActivity.class);
                                                         intent.putExtra("letter_id", "0");
