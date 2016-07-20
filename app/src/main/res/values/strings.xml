@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Secretter</string>
+    <string name="facebook_app_id">1668283160164420</string> <!-- 문수 페북 app UD -->
+</resources>
