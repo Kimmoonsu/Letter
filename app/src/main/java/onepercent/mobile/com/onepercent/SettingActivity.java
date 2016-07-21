@@ -12,7 +12,7 @@ import android.widget.Toast;
 
 public class SettingActivity extends Activity implements View.OnClickListener{
     ImageView BACK;
-    TextView Alarm,Alarmtext,notice,information1,version1,invite , reciveBox, sendBox;
+    TextView Alarm,Alarmtext,notice,information1,version1,invite , reciveBox, sendBox, myInformation;
     int PP =2;//2는 알림받는다는 것을 초기화
     int distance;
     @Override
@@ -32,7 +32,7 @@ public class SettingActivity extends Activity implements View.OnClickListener{
         version1=(TextView) findViewById(R.id.version);
         reciveBox=(TextView) findViewById(R.id.reciveBox);
         sendBox=(TextView) findViewById(R.id.sendBox);
-
+        myInformation = (TextView) findViewById(R.id.myinformation);
         BACK.setOnClickListener(this);
         Alarm.setOnClickListener(this);
         invite.setOnClickListener(this);
@@ -41,7 +41,7 @@ public class SettingActivity extends Activity implements View.OnClickListener{
         information1.setOnClickListener(this);
         reciveBox.setOnClickListener(this);
         sendBox.setOnClickListener(this);
-
+        myInformation.setOnClickListener(this);
         Intent intent = new Intent(this.getIntent());
         PP= intent.getIntExtra("P",0); //p는 알람에서 스위치 꺼짐했을때가 p가 1 켜져있을때가 p가 2
 
@@ -78,6 +78,11 @@ public class SettingActivity extends Activity implements View.OnClickListener{
             case R.id.version :
                 break;
             case R.id.information :
+
+                break;
+            case R.id.myinformation :
+                intent = new Intent(SettingActivity.this, MyInformation.class);
+                startActivity(intent);
                 break;
             case R.id.sendBox:
                 intent = new Intent(SettingActivity.this, LetterListActivity.class);
