@@ -32,6 +32,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import onepercent.mobile.com.onepercent.Model.ActivityModel;
 import onepercent.mobile.com.onepercent.SQLite.DBManager;
 import onepercent.mobile.com.onepercent.SQLite.FriendAdapter;
 import onepercent.mobile.com.onepercent.SQLite.FriendInfo;
@@ -233,6 +234,7 @@ public class AddFriendActivity extends Activity implements  View.OnClickListener
                 intent.putExtra("id", id);
                 intent.putExtra("nickname", nickname);
                 startActivity(intent);
+                ActivityModel.actList.add(AddFriendActivity.this);
                 ad.cancel();
             }
         });

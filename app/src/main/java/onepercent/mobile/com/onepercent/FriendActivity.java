@@ -13,6 +13,7 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 
+import onepercent.mobile.com.onepercent.Model.ActivityModel;
 import onepercent.mobile.com.onepercent.SQLite.DBManager;
 import onepercent.mobile.com.onepercent.SQLite.FriendAdapter;
 import onepercent.mobile.com.onepercent.SQLite.FriendInfo;
@@ -80,7 +81,7 @@ public class FriendActivity extends Activity implements  View.OnClickListener{
                 intent.putExtra("id", id);
                 intent.putExtra("nickname", nickname);
                 startActivity(intent);
-
+                ActivityModel.actList.add(FriendActivity.this);
             }
         });
     }

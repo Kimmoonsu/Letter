@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,11 +36,14 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 import onepercent.mobile.com.onepercent.Map.Item;
 import onepercent.mobile.com.onepercent.Map.MapApiConst;
+import onepercent.mobile.com.onepercent.Model.ActivityModel;
 import onepercent.mobile.com.onepercent.Model.BackPressCloseHandler;
 import onepercent.mobile.com.onepercent.Model.User;
 import onepercent.mobile.com.onepercent.SQLite.DBManager;
@@ -87,7 +91,7 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
     DBManager manager;
 
     Bitmap letterYellow, letterRed, letterGreen;
-
+    User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,7 +110,7 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         backPressCloseHandler = new BackPressCloseHandler(this);
-        User user = User.getInstance();
+        user = User.getInstance();
         user_id = user.getUser_id();
         user_name = user.getUser_name();
         Log.d("letter", "user_id : " + user_id + " user_name : " + user_name);
@@ -137,7 +141,7 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
 
 //          /* DB  */
         manager = new DBManager(this);
-//        manager.insertData1(new LetterInfo(0, "보내는 id", "보내는사람 이름", "내용", "도봉산역", 37.5041151, 127.0447707, 0,"2016-07-21"), ctx);
+//        manager.insertData1(new LetterInfo(0, "보내는 id", "보내는사람 이름", "내용", "도봉산역", 37.50451, 127.0447707, 0,"2016-07-21"), ctx);
 //        manager.insertData1(new LetterInfo(1,  "보내는 id", "보내는사람 이름", "내용", "도봉역", 37.6794452,127.0433323, 0,"2016-07-21"), ctx);
 //        manager.insertData1(new LetterInfo(2, "보내는 id", "보내는사람 이름", "내용", "성신여대역", 37.5927242, 127.0143553, 0,"2016-07-21"), ctx);
 //        manager.insertData1(new LetterInfo(3,   "보내는 id",   "보내는사람 이름",  "내용","성신여대" ,37.5913145,127.0199425,  0,"2016-07-21"),ctx);
@@ -418,7 +422,9 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
     @Override
     public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem, MapPOIItem.CalloutBalloonButtonType calloutBalloonButtonType) {
         final Item item = mTagItemMap.get(mapPOIItem.getTag());
+
         LetterInfo letters = manager.dataGet(item.letter_id);
+
         Log.d("letter","Item name : "+mapPOIItem.getItemName());
         if(mapPOIItem.getItemName().equals("green") || mapPOIItem.getItemName().equals("red")) //   (읽을 수 있음)
         {
@@ -432,31 +438,40 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
             TextView tem_from = (TextView) layout.findViewById(R.id.tem_from);
             Button tem_close = (Button) layout.findViewById(R.id.tem_close);
 
-            tem_to.setText("To."+user_name);
+            tem_to.setText("To. " + user_name);
             tem_context.setText(letters.context);
             tem_date.setText(letters.date);
-            tem_from.setText(item.send_name);
-            tem_from.setText("From."+item.send_name);
+            tem_from.setText("From. " + item.send_name);
 
             AlertDialog.Builder aDialog = new AlertDialog.Builder(ctx);
             aDialog.setView(layout);
             final AlertDialog ad = aDialog.create();
             ad.show();
+
+            // AlertDialog 에서 위치 크기 수정
+            DisplayMetrics dm = getApplicationContext().getResources().getDisplayMetrics();
+            int width = dm.widthPixels;
+            int height = dm.heightPixels;
+            Log.d("SUN", "width : "+ width);
+            Log.d("SUN", "height : " + height);
             WindowManager.LayoutParams params = ad.getWindow().getAttributes();
-            params.width = 600;
-            params.height = 800;
+
+            params.width = width/10*9;
+            params.height = height/10*9;
             ad.getWindow().setAttributes(params);
 
             tem_close.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
+                    String url = "http://52.78.88.51:8080/letter/updateLetterState.do";
+                    updateLetterState(url, String.valueOf(item.letter_id));
                     manager.updateData1(item.letter_id); // 읽음 상태 갱신
                     ad.cancel();
                 }
             });
+
         }
-        else{ //   (읽을 수 없음)
+        else if(mapPOIItem.getItemName().equals("yellow")){ //   (읽을 수 없음)
             AlertDialog.Builder ab = new AlertDialog.Builder(ctx);
             ab.setTitle("읽을 수 없습니다.");
             ab.setPositiveButton("ok", new DialogInterface.OnClickListener() {
@@ -465,7 +480,10 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
                     // Toast.makeText(CardActivity.this, item.send_id+" "+item.send_name+" "+item.address+" "+item.context+" "+item.latitude+" "+item.longitude, Toast.LENGTH_SHORT).show();
                 }
             });
+            ab.show();
         }
+
+
     }
 
 
@@ -483,7 +501,10 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
     @Override
     protected void onNewIntent(Intent intent) {
         Log.d("letter", "onNewIntent() called.");
-
+        Date d = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String date = sdf.format(d).toString();
+        user.setUser_date(date);
         processIntent(intent);
 
         super.onNewIntent(intent);
@@ -567,6 +588,10 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
         String to_id = intent.getStringExtra("to_id");
         String to_name = intent.getStringExtra("to_name");
         String date = intent.getStringExtra("date");
+        Date d = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String access_date = sdf.format(d).toString();
+        user.setUser_date(access_date);
         if (latitude != 0.0) {
             String data = "";
 

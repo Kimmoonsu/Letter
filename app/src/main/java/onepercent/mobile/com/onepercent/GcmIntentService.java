@@ -61,6 +61,7 @@ public class GcmIntentService extends IntentService {
                 String latitude = intent.getStringExtra("latitude");
                 String longitude = intent.getStringExtra("longitude");
                 String date = intent.getStringExtra("date");
+                Log.d("encode", "content : " + content);
                 Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
                 // Post notification of received message.
                 try {
@@ -72,14 +73,12 @@ public class GcmIntentService extends IntentService {
                     //sendNotification(" [ " + sender + " ] " + data, data, sender, receiver);
 
 
-
                     /*************** App이 실행중일 때 와 실행중이지 않을 때 알림 받는 경우를 구분하기 위해 사용 *************************/
                     ActivityManager am = (ActivityManager) this.getSystemService(Context.ACTIVITY_SERVICE);
                     List<ActivityManager.RunningTaskInfo> runList = am.getRunningTasks(10);
                     ComponentName name = runList.get(0).topActivity;
                     String className = name.getClassName();
                     boolean isAppRunning = false;
-
 
                     if(className.contains("onepercent.mobile.com.onepercent")) {
                         isAppRunning = true;
@@ -99,6 +98,7 @@ public class GcmIntentService extends IntentService {
                         cardintent.putExtra("address", address);
                         cardintent.putExtra("date", date);
                         cardintent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        Log.d("encode", "d_content : " + d_content);
                         this.startActivity(cardintent);
                         // 앱이 실행중일 경우 로직 구현
 

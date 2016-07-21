@@ -55,6 +55,7 @@ import onepercent.mobile.com.onepercent.Map.Item;
 import onepercent.mobile.com.onepercent.Map.MapApiConst;
 import onepercent.mobile.com.onepercent.Map.OnFinishSearchListener;
 import onepercent.mobile.com.onepercent.Map.Searcher;
+import onepercent.mobile.com.onepercent.Model.ActivityModel;
 import onepercent.mobile.com.onepercent.Model.User;
 import onepercent.mobile.com.onepercent.SQLite.DBManager;
 import onepercent.mobile.com.onepercent.SQLite.LetterInfo;
@@ -193,16 +194,18 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
             case R.id.sendBtn: // 서버로 편지내용 전송
                 // 날짜
                 Date d = new Date();
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 String date = sdf.format(d).toString();
                 Log.d("letter",  "date : "+date);
                 toContext  = contextEt.getText().toString();
-                Log.d("letter", "sendLetter : " + from_id+" , " + from_name + " . " + inAddress + "!!");
-                manager.insertData2(new LetterInfo(0, toId, toNickname, toContext, inAddress, inLatitude, inLongitude, 0,date), ctx);
-                String url = "http://172.16.101.62:8080/letter/insertLetter.do";
+                Log.d("letter", "sendLetter : " + from_id + " , " + from_name + " . " + inAddress + "!!");
+                manager.insertData2(new LetterInfo(0, toId, toNickname, toContext, inAddress, inLatitude, inLongitude, 0, date), ctx);
+                String url = "http://52.78.88.51:8080/letter/insertLetter.do";
                 sendLetter(url, toId, toNickname, from_id, from_name, inAddress, toContext, inLatitude, inLongitude, date);
-
-
+                for (int i = 0; i < ActivityModel.actList.size(); i++)
+                    ActivityModel.actList.get(i).finish();
+                ActivityModel.actList.clear();
+                finish();
                 break;
 
         }

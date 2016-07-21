@@ -35,7 +35,7 @@ public class BackPressCloseHandler {
             String date = sdf.format(d).toString();
             User user = User.getInstance();
             user.setClose_date(date);
-            String url = "http://172.16.101.62:8080/letter/closeUser.do";
+            String url = "http://52.78.88.51:8080/letter/closeUser.do";
             sendCloseUser(url, user.getUser_id(), user.getUser_name(), user.getUser_date(), date);
             activity.finish();
             toast.cancel();
