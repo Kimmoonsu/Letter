@@ -50,8 +50,8 @@ public class DBManager {
         @Override
         public void onCreate(SQLiteDatabase arg0) {
             String createSql = "create table " + tableName + " (id text not null, nickname text not null, primary key(id));";
-           String createSql1 = "create table " + tableName1 + " (letter_id int not null,send_id text not null, send_name text not null, context text not null, address text not null, latitude double not null, longitude double not null, state int not null ,  primary key(letter_id));";
-            String createSql2 = "create table " + sendTable + " (letter_id integer primary key ,send_id text not null, send_name text not null, context text not null, address text not null, latitude double not null, longitude double not null, state int not null);";
+            String createSql1 = "create table " + tableName1 + " (letter_id int not null,send_id text not null, send_name text not null, context text not null, address text not null, latitude double not null, longitude double not null, state int not null ,date text not null ,  primary key(letter_id));";
+            String createSql2 = "create table " + sendTable + " (letter_id integer primary key ,send_id text not null, send_name text not null, context text not null, address text not null, latitude double not null, longitude double not null, state int not null,date text not null);";
 
             arg0.execSQL(createSql);
             arg0.execSQL(createSql1);
@@ -76,7 +76,7 @@ public class DBManager {
         }
     }
 
-   // 데이터 전체 검색
+    // 데이터 전체 검색
     public ArrayList<FriendInfo> selectAll() {
         String sql = "select * from " + tableName + ";";
         Cursor results = db.rawQuery(sql, null);
@@ -127,13 +127,22 @@ public class DBManager {
     /**************************************** recive LetterBox Table **********************************************/
     // 데이터 추가
     public void insertData1(LetterInfo info,Context context) {
-        String sql = "insert into " + tableName1 + " values("+info.letter_id+",'"+info.send_id+"','"+info.send_name+"','"+info.context+"','"+info.address+"',"+info.latitude+","+info.longitude+","+info.state+");";
+        String sql = "insert into " + tableName1 + " values("+info.letter_id+",'"+info.send_id+"','"+info.send_name+"','"+info.context+"','"+info.address+"',"+info.latitude+","+info.longitude+","+info.state+",'"+info.date+"');";
         try{
             db.execSQL(sql);
         }catch(Exception e){
         }
     }
+    // 데이터 갱신
+    public void updateData1(int index) {
+        String sql = "update " + tableName1 + " set state=1  where letter_id = " + index+";";
 
+        try{
+            db.execSQL(sql);
+        }catch(Exception e){
+            Log.d("database","database 갱신 에러 !!!!!!!!!!!!!!!!!!!!!!!!!!");
+        }
+    }
 
     public ArrayList<LetterInfo> selectAll1() {
         String sql = "select * from " + tableName1 + ";";
@@ -143,7 +152,7 @@ public class DBManager {
         ArrayList<LetterInfo> infos = new ArrayList<LetterInfo>();
 
         while (!results.isAfterLast()) {
-            LetterInfo info = new LetterInfo(results.getInt(0), results.getString(1),results.getString(2),results.getString(3),results.getString(4),results.getDouble(5),results.getDouble(6),results.getInt(7));
+            LetterInfo info = new LetterInfo(results.getInt(0), results.getString(1),results.getString(2),results.getString(3),results.getString(4),results.getDouble(5),results.getDouble(6),results.getInt(7),results.getString(8));
             infos.add(info);
             Log.d("letter",results.getInt(0)+results.getString(1)+results.getString(2)+results.getString(3));
             results.moveToNext();
@@ -152,31 +161,27 @@ public class DBManager {
         return infos;
     }
 
-
-    public ArrayList<LetterInfo> selectAllstate() {
-        String sql = "select * from " + tableName1 + " where state=0;";
+    public LetterInfo dataGet(int let_id) {
+        String sql = "select * from " + tableName1 + " where letter_id ="+let_id+";";
         Cursor results = db.rawQuery(sql, null);
 
         results.moveToFirst();
-        ArrayList<LetterInfo> infos = new ArrayList<LetterInfo>();
+        LetterInfo infos = null;
 
         while (!results.isAfterLast()) {
-            LetterInfo info = new LetterInfo(results.getInt(0), results.getString(1),results.getString(2),results.getString(3),results.getString(4),results.getDouble(5),results.getDouble(6),results.getInt(7));
-            infos.add(info);
+            infos = new LetterInfo(results.getInt(0), results.getString(1),results.getString(2),results.getString(3),results.getString(4),results.getDouble(5),results.getDouble(6),results.getInt(7),results.getString(8));
 
-           results.moveToNext();
+            Log.d("letter",results.getInt(0)+results.getString(1)+results.getString(2)+results.getString(3));
+            results.moveToNext();
         }
         results.close();
         return infos;
     }
 
-    public int nonstateSize() {
-        String sql = "select * from " + tableName1 + " where state=0;";
+    public int letterSize() {
+        String sql = "select * from " + tableName1 + " ;";
         Cursor results = db.rawQuery(sql, null);
-
         int size =results.getCount();
-
-        Log.d("SUN","SIZE : "+size);
         results.close();
         return size;
     }
@@ -184,8 +189,8 @@ public class DBManager {
     /**************************************** send LetterBox Table **********************************************/
     // 데이터 추가
     public void insertData2(LetterInfo info,Context context) {
-        String sql = "insert into " + sendTable + " values('"+info.send_id+"','"+info.send_name+"','"+info.context+"','"+info.address+"',"+info.latitude+","+info.longitude+","+info.state+");";
-        Log.d("SUN", "recive sql : " + sql);
+        String sql = "insert into " + sendTable + " values('"+info.send_id+"','"+info.send_name+"','"+info.context+"','"+info.address+"',"+info.latitude+","+info.longitude+","+info.state+",'"+info.date+"');";
+        Log.d("database", "recive sql : " + sql);
 
         try{
             db.execSQL(sql);
@@ -201,7 +206,7 @@ public class DBManager {
         ArrayList<LetterInfo> infos = new ArrayList<LetterInfo>();
 
         while (!results.isAfterLast()) {
-            LetterInfo info = new LetterInfo(results.getInt(0), results.getString(1),results.getString(2),results.getString(3),results.getString(4),results.getDouble(5),results.getDouble(6),results.getInt(7));
+            LetterInfo info = new LetterInfo(results.getInt(0), results.getString(1),results.getString(2),results.getString(3),results.getString(4),results.getDouble(5),results.getDouble(6),results.getInt(7),results.getString(8));
             infos.add(info);
             Log.d("letter",results.getInt(0)+results.getString(1)+results.getString(2)+results.getString(3)+results.getString(4)+results.getDouble(5));
             results.moveToNext();
@@ -209,6 +214,5 @@ public class DBManager {
         results.close();
         return infos;
     }
-
 
 }

@@ -11,8 +11,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,12 +28,19 @@ import net.daum.mf.map.api.MapPointBounds;
 import net.daum.mf.map.api.MapView;
 import net.daum.mf.map.api.MapView.POIItemEventListener;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import onepercent.mobile.com.onepercent.Map.Item;
 import onepercent.mobile.com.onepercent.Map.MapApiConst;
+import onepercent.mobile.com.onepercent.Model.BackPressCloseHandler;
 import onepercent.mobile.com.onepercent.Model.User;
 import onepercent.mobile.com.onepercent.SQLite.DBManager;
 import onepercent.mobile.com.onepercent.SQLite.LetterInfo;
@@ -42,10 +52,14 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
 
     // letter
     int letter_id;
-    String to_id, to_name, content, address, from_id, from_name;
+    String to_id, to_name, content, address, from_id, from_name, date;
     double latitude, longitude;
 
     Handler handler = new Handler();
+
+    // back button handler
+    private BackPressCloseHandler backPressCloseHandler;
+
     // Main Widget
     Context ctx;
     ImageButton writeBtn, shareBtn, settingBtn, synchBtn, pushBtn;
@@ -72,12 +86,26 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
     ArrayList<LetterInfo> arrayList = new ArrayList<LetterInfo>();
     DBManager manager;
 
+    Bitmap letterYellow, letterRed, letterGreen;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_card);
+
+
+        letterYellow =  BitmapFactory.decodeResource(getResources(), R.drawable.letter);
+        letterYellow = Bitmap.createScaledBitmap(letterYellow, 60, 75, true);
+        letterGreen=  BitmapFactory.decodeResource(getResources(), R.drawable.letter1);
+        letterGreen = Bitmap.createScaledBitmap(letterGreen, 60, 75, true);
+        letterRed=  BitmapFactory.decodeResource(getResources(), R.drawable.letter2);
+        letterRed = Bitmap.createScaledBitmap(letterRed, 60, 75, true);
+
+
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
+        backPressCloseHandler = new BackPressCloseHandler(this);
         User user = User.getInstance();
         user_id = user.getUser_id();
         user_name = user.getUser_name();
@@ -109,18 +137,13 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
 
 //          /* DB  */
         manager = new DBManager(this);
+//        manager.insertData1(new LetterInfo(0, "보내는 id", "보내는사람 이름", "내용", "도봉산역", 37.5041151, 127.0447707, 0,"2016-07-21"), ctx);
+//        manager.insertData1(new LetterInfo(1,  "보내는 id", "보내는사람 이름", "내용", "도봉역", 37.6794452,127.0433323, 0,"2016-07-21"), ctx);
+//        manager.insertData1(new LetterInfo(2, "보내는 id", "보내는사람 이름", "내용", "성신여대역", 37.5927242, 127.0143553, 0,"2016-07-21"), ctx);
+//        manager.insertData1(new LetterInfo(3,   "보내는 id",   "보내는사람 이름",  "내용","성신여대" ,37.5913145,127.0199425,  0,"2016-07-21"),ctx);
 
-
-//        manager.insertData1(new LetterInfo(0, "보내는 id", "보내는사람 이름", "내용", "도봉산역", 37.6896072, 127.0441583, 0), ctx);
-//        manager.insertData1(new LetterInfo(1,  "보내는 id", "보내는사람 이름", "내용", "도봉역", 37.6794452,127.0433323, 0), ctx);
-//        manager.insertData1(new LetterInfo(2, "보내는 id", "보내는사람 이름", "내용", "성신여대역", 37.5927242, 127.0143553, 0), ctx);
-//        manager.insertData1(new LetterInfo(3,   "보내는 id",   "보내는사람 이름",  "내용","성신여대" ,37.5913145,127.0199425,  0),ctx);
-//        manager.insertData1(new LetterInfo(4, "보내는 id", "보내는사람 이름", "내용", "상지초등학교", 37.493405, 126.763322, 0), ctx);
-//        manager.insertData1(new LetterInfo(5,   "보내는 id",   "보내는사람 이름",  "내용","우리집" ,   37.4915496,126.7542664,  0),ctx);
-
-
-        LETTER_SIZE = manager.nonstateSize();
-        arrayList = manager.selectAllstate();
+        LETTER_SIZE = manager.letterSize();
+        arrayList = manager.selectAll1();
         manager.selectAll2();
     }
 
@@ -133,8 +156,8 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
     @Override
     protected void onResume() {
         super.onResume();
-        LETTER_SIZE = manager.nonstateSize();
-        arrayList = manager.selectAllstate();
+        LETTER_SIZE = manager.letterSize();
+        arrayList = manager.selectAll1();
         // 지도
         mMapView =  new MapView(this);
         mMapView.setDaumMapApiKey(MapApiConst.DAUM_MAPS_ANDROID_APP_API_KEY);
@@ -145,8 +168,6 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
         mMapView.setPOIItemEventListener(this);
 
         MapPointBounds mapPointBounds = new MapPointBounds();
-        Bitmap letter =  BitmapFactory.decodeResource(getResources(), R.drawable.letter);
-        letter = Bitmap.createScaledBitmap(letter,60,75, true);
         for (int i = 0; i < LETTER_SIZE; i++) {
 
             Item item = new Item();
@@ -161,19 +182,30 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
             item.context =  arrayList.get(i).context;
 
             MapPOIItem poiItem = new MapPOIItem();
-            poiItem.setItemName("from."+arrayList.get(i).send_name);
             poiItem.setTag(i);
             MapPoint mapPoint = MapPoint.mapPointWithGeoCoord( item.latitude, item.longitude);
             poiItem.setMapPoint(mapPoint);
             mapPointBounds.add(mapPoint);
-            poiItem.setMarkerType(MapPOIItem.MarkerType.CustomImage);
-            poiItem.setCustomImageBitmap(letter);
-            poiItem.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
-            poiItem.setCustomSelectedImageBitmap(letter);
+
+            if(arrayList.get(i).state==0) // 안읽은 거
+            {
+                poiItem.setItemName("yellow");
+                poiItem.setMarkerType(MapPOIItem.MarkerType.CustomImage);
+                poiItem.setCustomImageBitmap(letterYellow);
+                poiItem.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
+                poiItem.setCustomSelectedImageBitmap(letterYellow);
+            }
+            else{
+                poiItem.setItemName("red"); // 읽은 것
+                poiItem.setMarkerType(MapPOIItem.MarkerType.CustomImage);
+                poiItem.setCustomImageBitmap(letterRed);
+                poiItem.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
+                poiItem.setCustomSelectedImageBitmap(letterRed);
+
+            }
+
             poiItem.setCustomImageAutoscale(false);
             poiItem.setCustomImageAnchor(0.5f, 1.0f);
-
-
 
 
             mMapView.addPOIItem(poiItem);
@@ -183,6 +215,11 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
         mMapView.moveCamera(CameraUpdateFactory.newMapPointBounds(mapPointBounds));
     }
 
+    @Override
+    public void onBackPressed() {
+        //super.onBackPressed();
+        backPressCloseHandler.onBackPressed();
+    }
     public  void GPSGPS(){
         gps= new GpsInfo(CardActivity.this);
         //GPS 사용유무 가져오기다
@@ -190,7 +227,7 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
             MapPointBounds mapPointBounds = new MapPointBounds();
             double latitude = gps.getLatitude(); //위도다
             double longitude = gps.getLongitude(); //경도다
-            LETTER_SIZE = manager.nonstateSize();
+            LETTER_SIZE = manager.letterSize();
 
             mMapView.removeAllPOIItems();
             letterCheck(latitude,longitude); // 내주변 편지 체크
@@ -226,83 +263,66 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
     }
 
     // 내주변의 편지 체크하기
-    public void letterCheck(double lati, double longi)
-    {
-        if(arrayList.size()>0)
+    public void letterCheck(double lati, double longi) {
+        if (arrayList.size() > 0)
             arrayList.clear();
-        arrayList = manager.selectAllstate();
-        Bitmap letter =  BitmapFactory.decodeResource(getResources(), R.drawable.letter);
-        letter = Bitmap.createScaledBitmap(letter, 60, 75, true);
-        Bitmap letter1 =  BitmapFactory.decodeResource(getResources(), R.drawable.letter1);
-        letter1 = Bitmap.createScaledBitmap(letter1, 60, 75, true);
+        arrayList = manager.selectAll1();
+//        Bitmap letter =  BitmapFactory.decodeResource(getResources(), R.drawable.letter);
+//        letter = Bitmap.createScaledBitmap(letter, 60, 75, true);
+//        Bitmap letter1 =  BitmapFactory.decodeResource(getResources(), R.drawable.letter1);
+//        letter1 = Bitmap.createScaledBitmap(letter1, 60, 75, true);
 
-        for (int i = 0; i < LETTER_SIZE; i++) {
+        for (int i = 0; i < LETTER_SIZE; i++)
+        {
 
             Item item = new Item();
-            item.title =  "from."+arrayList.get(i).send_name;
-            item.address =  arrayList.get(i).address;
-            item.latitude =  arrayList.get(i).latitude;
-            item.longitude =  arrayList.get(i).longitude;
-            item.longitude =  arrayList.get(i).longitude;
+            item.title = "from." + arrayList.get(i).send_name;
+            item.address = arrayList.get(i).address;
+            item.latitude = arrayList.get(i).latitude;
+            item.longitude = arrayList.get(i).longitude;
+            item.longitude = arrayList.get(i).longitude;
 
-            item.letter_id =  arrayList.get(i).letter_id;
-            item.send_id =  arrayList.get(i).send_id;
-            item.send_name =  arrayList.get(i).send_name;
-            item.state =  arrayList.get(i).state;
-            item.context =  arrayList.get(i).context;
+            item.letter_id = arrayList.get(i).letter_id;
+            item.send_id = arrayList.get(i).send_id;
+            item.send_name = arrayList.get(i).send_name;
+            item.state = arrayList.get(i).state;
+            item.context = arrayList.get(i).context;
 
             MapPOIItem poiItem = new MapPOIItem();
 
-
-            if(getDistance(lati, longi, item.latitude, item.longitude) <= 500.0) {
-                poiItem.setItemName("possible");
-                poiItem.setTag(i);
-                MapPoint mapPoint = MapPoint.mapPointWithGeoCoord( item.latitude, item.longitude);
-                poiItem.setMapPoint(mapPoint);
-
-                poiItem.setMarkerType(MapPOIItem.MarkerType.CustomImage);
-                poiItem.setCustomImageBitmap(letter1);
-                poiItem.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
-                poiItem.setCustomSelectedImageBitmap(letter1);
-            }
-            else
+            if (arrayList.get(i).state == 0) // 안읽은 거
             {
-                poiItem.setItemName("impossible");
-                        poiItem.setTag(i);
-                MapPoint mapPoint = MapPoint.mapPointWithGeoCoord( item.latitude, item.longitude);
-                poiItem.setMapPoint(mapPoint);
-
+                if (getDistance(lati, longi, item.latitude, item.longitude) <= 500.0) { //읽을 수 있는 것
+                    poiItem.setItemName("green");
+                    poiItem.setMarkerType(MapPOIItem.MarkerType.CustomImage);
+                    poiItem.setCustomImageBitmap(letterGreen);
+                    poiItem.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
+                    poiItem.setCustomSelectedImageBitmap(letterGreen);
+                } else {
+                    poiItem.setItemName("yellow");
+                    poiItem.setMarkerType(MapPOIItem.MarkerType.CustomImage);
+                    poiItem.setCustomImageBitmap(letterYellow);
+                    poiItem.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
+                    poiItem.setCustomSelectedImageBitmap(letterYellow);
+                }
+            } else {
+                poiItem.setItemName("red");
                 poiItem.setMarkerType(MapPOIItem.MarkerType.CustomImage);
-                poiItem.setCustomImageBitmap(letter);
+                poiItem.setCustomImageBitmap(letterRed);
                 poiItem.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
-                poiItem.setCustomSelectedImageBitmap(letter);
+                poiItem.setCustomSelectedImageBitmap(letterRed);
             }
+            poiItem.setTag(i);
+            MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(item.latitude, item.longitude);
+            poiItem.setMapPoint(mapPoint);
             poiItem.setCustomImageAutoscale(false);
             poiItem.setCustomImageAnchor(0.5f, 1.0f);
 
             mMapView.addPOIItem(poiItem);
             mTagItemMap.put(poiItem.getTag(), item);
 
-        }
+        } // for
     }
-
-    // 비트맵 비교하기
-//    public boolean sameAs(Bitmap bitmap)
-//    {
-//        Bitmap original =  BitmapFactory.decodeResource(getResources(), R.drawable.letter1);
-//        original = Biㅁtmap.createScaledBitmap(original, 60, 75, true);
-//
-//        ByteBuffer bf1 = ByteBuffer.allocate(original.getHeight() * original.getRowBytes());
-//        original.copyPixelsToBuffer(bf1);
-//
-//        ByteBuffer bf2 = ByteBuffer.allocate(bitmap.getHeight() * bitmap.getRowBytes());
-//        bitmap.copyPixelsToBuffer(bf2);
-//
-//        return Arrays.equals(bf1.array(),bf2.array());
-//
-//
-//    }
-
 
 
     /******************* get distance method ************************/
@@ -394,49 +414,58 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
 
     }
 
-   /* 말풍선 클릭*/
+    /* 말풍선 클릭*/
     @Override
     public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem, MapPOIItem.CalloutBalloonButtonType calloutBalloonButtonType) {
         final Item item = mTagItemMap.get(mapPOIItem.getTag());
-        Log.d("letter", "Click");
-
-//        Bitmap bit = mapPOIItem.getCustomImageBitmap();
-//        sameAs(bit)
-        AlertDialog.Builder ab = new AlertDialog.Builder(ctx);
-
-        if(mapPOIItem.getItemName().equals("possible")) //   (읽을 수 있음)
+        LetterInfo letters = manager.dataGet(item.letter_id);
+        Log.d("letter","Item name : "+mapPOIItem.getItemName());
+        if(mapPOIItem.getItemName().equals("green") || mapPOIItem.getItemName().equals("red")) //   (읽을 수 있음)
         {
-           ab.setTitle("편지를 읽으시겠습니까?");
+            Toast.makeText(CardActivity.this, item.send_id+" "+item.send_name+" "+item.address+" "+item.context+" "+item.latitude+" "+item.longitude, Toast.LENGTH_SHORT).show();
+            LayoutInflater inflate = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View layout = inflate.inflate(R.layout.letter_templete, null);
 
-            ab.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+            TextView tem_to = (TextView) layout.findViewById(R.id.tem_to);
+            TextView tem_context = (TextView) layout.findViewById(R.id.tem_context);
+            TextView tem_date = (TextView) layout.findViewById(R.id.tem_date);
+            TextView tem_from = (TextView) layout.findViewById(R.id.tem_from);
+            Button tem_close = (Button) layout.findViewById(R.id.tem_close);
+
+            tem_to.setText("To."+user_name);
+            tem_context.setText(letters.context);
+            tem_date.setText(letters.date);
+            tem_from.setText(item.send_name);
+            tem_from.setText("From."+item.send_name);
+
+            AlertDialog.Builder aDialog = new AlertDialog.Builder(ctx);
+            aDialog.setView(layout);
+            final AlertDialog ad = aDialog.create();
+            ad.show();
+            WindowManager.LayoutParams params = ad.getWindow().getAttributes();
+            params.width = 600;
+            params.height = 800;
+            ad.getWindow().setAttributes(params);
+
+            tem_close.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    Toast.makeText(CardActivity.this, item.send_id+" "+item.send_name+" "+item.address+" "+item.context+" "+item.latitude+" "+item.longitude, Toast.LENGTH_SHORT).show();
+                public void onClick(View view) {
+
+                    manager.updateData1(item.letter_id); // 읽음 상태 갱신
+                    ad.cancel();
                 }
             });
-
-            ab.setNegativeButton("cancle", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {            }
-            });
-            ab.show();
         }
         else{ //   (읽을 수 없음)
-            ab.setTitle("거리가 멀어 읽을 수 없습니다.");
+            AlertDialog.Builder ab = new AlertDialog.Builder(ctx);
+            ab.setTitle("읽을 수 없습니다.");
             ab.setPositiveButton("ok", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     // Toast.makeText(CardActivity.this, item.send_id+" "+item.send_name+" "+item.address+" "+item.context+" "+item.latitude+" "+item.longitude, Toast.LENGTH_SHORT).show();
                 }
             });
-            ab.setNegativeButton("cancle", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                }
-            });
         }
-
-
     }
 
 
@@ -475,6 +504,7 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
         String to_id = intent.getStringExtra("to_id");
         String to_name = intent.getStringExtra("to_name");
         String address = intent.getStringExtra("address");
+        String date = intent.getStringExtra("date");
         String data = "";
         String msg = intent.getStringExtra("msg");
         try {
@@ -494,8 +524,8 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
             }
         });
         // 전역변수에 선언 된 편지table 내용을 setter
-        setLetter(letter_id, to_id, to_name, from_id, from_name, content, latitude, longitude, address);
-        Log.d("letter", "letter table : " + letter_id + " , " + to_id + " , " + to_name + " , " + from_id + ", " + from_name + " , " + content + " , " + latitude + " , " + longitude + " , " + address + "!!");
+        setLetter(letter_id, to_id, to_name, from_id, from_name, content, latitude, longitude, address, date);
+        Log.d("letter", "getter letter table : " + letter_id + " , " + to_id + " , " + to_name + " , " + from_id + ", " + from_name + " , " + content + " , " + latitude + " , " + longitude + ", " + date+", " + address + "!!");
         println("새로운 메시지가 도착했습니다 : " + data);
         comparePush();
     }
@@ -512,7 +542,7 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
     }
 
     //letter table attribute setter
-    private void setLetter(int letter_id, String to_id, String to_name, String from_id, String from_name, String content, double latitude, double longitude, String address) {
+    private void setLetter(int letter_id, String to_id, String to_name, String from_id, String from_name, String content, double latitude, double longitude, String address, String date) {
         this.letter_id = letter_id;
         this.to_id = to_id;
         this.to_name = to_name;
@@ -522,6 +552,7 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
         this.latitude = latitude;
         this.longitude = longitude;
         this.address = address;
+        this.date = date;
     }
 
     // push로 온 data getter
@@ -535,6 +566,7 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
         double longitude = Double.parseDouble(intent.getStringExtra("longitude"));
         String to_id = intent.getStringExtra("to_id");
         String to_name = intent.getStringExtra("to_name");
+        String date = intent.getStringExtra("date");
         if (latitude != 0.0) {
             String data = "";
 
@@ -547,20 +579,56 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
                 ex.printStackTrace();
             }
         }
-        setLetter(letter_id, to_id, to_name, from_id, from_name, content, latitude, longitude, address);
-        Log.d("letter", "getter letter table : " + letter_id + " , " + to_id + " , " + to_name + " , " + from_id + ", " + from_name + " , " + content + " , " + latitude + " , " + longitude + "!!");
+        setLetter(letter_id, to_id, to_name, from_id, from_name, content, latitude, longitude, address, date);
+        Log.d("letter", "getter letter table : " + letter_id + " , " + to_id + " , " + to_name + " , " + from_id + ", " + from_name + " , " + content + " , " + latitude + " , " + longitude + ", " + date+", " + address + "!!");
     }
 
     private void comparePush() {
         /* DB  */
         manager = new DBManager(this);
         // 임시 데이터 삽입
-        manager.insertData1(new LetterInfo(letter_id,  from_id, from_name, content, address, latitude , longitude,  0),ctx);
-        LETTER_SIZE = manager.nonstateSize();
-        arrayList = manager.selectAllstate();
+        //manager.insertData1(new LetterInfo(0, "보내는 id", "보내는사람 이름", "내용", "도봉산역", 37.6896072, 127.0441583, 0,"2016-07-21"), ctx);
+        manager.insertData1(new LetterInfo(letter_id,  from_id, from_name, content, address, latitude , longitude, 0, date),ctx);
+        LETTER_SIZE = manager.letterSize();
+        arrayList = manager.selectAll1();
         manager.selectAll2();
-
     }
 
+    /*************************letter read ***********************/
+    public String updateLetterState(String strurl, String letter_id)
+    {
+        String response_msg =  null;
+        try {
+            String data = URLEncoder.encode("letter_id", "EUC-KR") + "=" + URLEncoder.encode(""+letter_id, "EUC-KR");
+
+            URL url = new URL(strurl);
+            URLConnection conn = url.openConnection();
+
+            conn.setDoOutput(true);
+            OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+            wr.write(data);
+            wr.flush();
+
+// Get the response
+            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream(),"UTF-8"));
+            String line;
+            while ((line = rd.readLine()) != null) {
+                if (line!="")
+                {
+                    response_msg = line;
+                }
+
+            }
+
+            wr.close();
+            rd.close();
+
+        }
+        catch (Exception e) {
+        }
+
+
+        return response_msg;
+    }
 
 }

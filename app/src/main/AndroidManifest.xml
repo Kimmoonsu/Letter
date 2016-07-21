@@ -55,7 +55,9 @@
         <activity android:name=".MapActivity" />
         <activity android:name=".alarm" />
         <activity android:name=".SettingActivity" />
+        <activity android:name=".MyInformation" />
         <activity android:name=".AddFriendActivity"/>
+
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />

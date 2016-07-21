@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent" android:layout_height="600dp">
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="To. 김문수"
+        android:padding="20dp"
+        android:id="@+id/tem_to" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:scrollbars="vertical"
+        android:text="이거 잘만들면 좋겠어여 행쇼행쇼!이거 잘만들면 좋겠어여 행쇼행쇼!이거 잘만들면 좋겠어여 행쇼행쇼!이거 잘만들면 좋겠어여 행쇼행쇼!"
+        android:padding="20dp"
+        android:id="@+id/tem_context" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="2016.07.21"
+        android:padding="20dp"
+        android:id="@+id/tem_date" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="From. 이선아"
+        android:padding="20dp"
+        android:id="@+id/tem_from" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="닫기"
+        android:id="@+id/tem_close" />
+</LinearLayout>

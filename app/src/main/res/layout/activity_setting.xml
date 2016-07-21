@@ -11,7 +11,6 @@
 
         >
 
-
         <ImageView
             android:background="#000000"
             android:layout_width="14dp"
@@ -158,9 +157,6 @@
         android:textSize="18sp"
         />
 
-
-
-
     <TextView
         android:layout_width="99.3dp"
         android:layout_height="25dp"
@@ -168,6 +164,18 @@
         android:layout_marginTop="28dp"
         android:text="개발자 정보"
         android:id="@+id/information"
+        android:textColor="#ffffff"
+        android:textSize="20sp"
+        />
+
+
+    <TextView
+        android:layout_width="99.3dp"
+        android:layout_height="25dp"
+        android:layout_marginLeft="28.8dp"
+        android:layout_marginTop="28dp"
+        android:text="사용자 정보"
+        android:id="@+id/myinformation"
         android:textColor="#ffffff"
         android:textSize="20sp"
         />

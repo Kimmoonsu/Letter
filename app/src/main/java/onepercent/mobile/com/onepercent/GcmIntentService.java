@@ -60,6 +60,7 @@ public class GcmIntentService extends IntentService {
                 String from_name = intent.getStringExtra("from_name");
                 String latitude = intent.getStringExtra("latitude");
                 String longitude = intent.getStringExtra("longitude");
+                String date = intent.getStringExtra("date");
                 Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
                 // Post notification of received message.
                 try {
@@ -96,12 +97,13 @@ public class GcmIntentService extends IntentService {
                         cardintent.putExtra("latitude", latitude);
                         cardintent.putExtra("longitude", longitude);
                         cardintent.putExtra("address", address);
+                        cardintent.putExtra("date", date);
                         cardintent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                         this.startActivity(cardintent);
                         // 앱이 실행중일 경우 로직 구현
 
                     } else {
-                        sendNotification(data, letter_id, to_id, to_name, from_id, from_name, address, d_content, latitude, longitude);
+                        sendNotification(data, letter_id, to_id, to_name, from_id, from_name, address, d_content, latitude, longitude, date);
                     }
                     releaseCpuLock();
                     /****************************************************************************************************/
@@ -119,7 +121,7 @@ public class GcmIntentService extends IntentService {
     // Put the message into a notification and post it.
     // This is just one simple example of what you might choose to do with
     // a GCM message.
-    private void sendNotification(String data, String letter_id, String to_id, String to_name, String from_id, String from_name, String address, String content, String latitude, String longitude) {
+    private void sendNotification(String data, String letter_id, String to_id, String to_name, String from_id, String from_name, String address, String content, String latitude, String longitude, String date) {
         mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
         Intent intent = new Intent(this, CardActivity.class);
@@ -133,6 +135,7 @@ public class GcmIntentService extends IntentService {
         intent.putExtra("content", content);
         intent.putExtra("latitude", latitude);
         intent.putExtra("longitude", longitude);
+        intent.putExtra("date", date);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         vibe.vibrate(500);

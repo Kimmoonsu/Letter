@@ -56,6 +56,24 @@
     </LinearLayout>
 
 
+    <LinearLayout
+        android:visibility="gone"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/titleLayout">
+
+        <TextView
+            android:padding="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="to. moonsu"
+            android:gravity="center"
+            android:textColor="#ffffff"
+            android:textSize="25dp"
+            android:id="@+id/titleTv" />
+    </LinearLayout>
+
     <FrameLayout
         android:id="@+id/map_view"
         android:layout_width="match_parent"
@@ -77,6 +95,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="받는 사람"
+            android:background="@drawable/a_edit"
+            android:visibility="gone"
             android:singleLine="true" />
 
         <EditText
@@ -85,12 +105,17 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:hint="편지 내용"
+            android:background="@drawable/a_edit"
             android:inputType="textMultiLine"
+            android:paddingLeft="10dp"
+            android:layout_marginBottom="10dp"
             android:maxLines="8" />
 
 
         <Button
             android:id="@+id/sendBtn"
+            android:paddingLeft="10dp"
+            android:background="@drawable/a_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="send" />

@@ -12,7 +12,7 @@ import android.widget.Toast;
 
 public class SettingActivity extends Activity implements View.OnClickListener{
     ImageView BACK;
-    TextView Alarm,Alarmtext,notice,information1,version1,invite;
+    TextView Alarm,Alarmtext,notice,information1,version1,invite , myinformation;
     int PP =2;//2는 알림받는다는 것을 초기화
     int distance;
     @Override
@@ -29,6 +29,7 @@ public class SettingActivity extends Activity implements View.OnClickListener{
         Alarmtext =(TextView) findViewById(R.id.alarmtext);//
         notice =(TextView) findViewById(R.id.notice);
         information1 =(TextView) findViewById(R.id.information);
+        myinformation =(TextView) findViewById(R.id.myinformation);
         version1=(TextView) findViewById(R.id.version);
         BACK.setOnClickListener(this);
         Alarm.setOnClickListener(this);
@@ -36,9 +37,10 @@ public class SettingActivity extends Activity implements View.OnClickListener{
         notice.setOnClickListener(this);
         version1.setOnClickListener(this);
         information1.setOnClickListener(this);
+        myinformation.setOnClickListener(this);
 
-        Intent intent = new Intent(this.getIntent());
-        PP= intent.getIntExtra("P",0); //p는 알람에서 스위치 꺼짐했을때가 p가 1 켜져있을때가 p가 2
+        //  Intent intent = new Intent(this.getIntent());
+        //   PP= intent.getIntExtra("P",0); //p는 알람에서 스위치 꺼짐했을때가 p가 1 켜져있을때가 p가 2
 
         if(PP==2)
         {
@@ -60,6 +62,9 @@ public class SettingActivity extends Activity implements View.OnClickListener{
                 finish();
                 break;
             case R.id.alarm:
+                Intent intent2 = new Intent(getApplicationContext(), alarm.class);
+                Toast.makeText(getApplication(), "알림설정 누름", Toast.LENGTH_SHORT).show();
+                startActivity(intent2);
 
                 break;
             case R.id.invite :
@@ -72,6 +77,11 @@ public class SettingActivity extends Activity implements View.OnClickListener{
             case R.id.version :
                 break;
             case R.id.information :
+                break;
+            case R.id.myinformation :
+                Intent intent4 = new Intent(getApplicationContext(), MyInformation.class);
+                Toast.makeText(getApplication(), "사용자정보 누름", Toast.LENGTH_SHORT).show();
+                startActivity(intent4);
                 break;
         }
     }

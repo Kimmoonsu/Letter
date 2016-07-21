@@ -43,7 +43,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -57,7 +59,7 @@ import onepercent.mobile.com.onepercent.Model.User;
 import onepercent.mobile.com.onepercent.SQLite.DBManager;
 import onepercent.mobile.com.onepercent.SQLite.LetterInfo;
 
-import static net.daum.mf.map.api.MapReverseGeoCoder.*;
+import static net.daum.mf.map.api.MapReverseGeoCoder.ReverseGeoCodingResultListener;
 
 public class MapActivity extends FragmentActivity implements MapView.MapViewEventListener, MapView.POIItemEventListener, View.OnClickListener, TextView.OnEditorActionListener, ReverseGeoCodingResultListener {
     private static final String LOG_TAG = "SearchDemoActivity";
@@ -79,9 +81,10 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
     public CustomAdapter adapter;
 
     // writer page
-    LinearLayout writerLayout,searchLayout;
+    LinearLayout writerLayout,searchLayout,titleLayout;
     Button sendBtn;
     EditText toEt, contextEt;
+    TextView titleTv;
 
     // gps
     private GpsInfo gps;
@@ -92,7 +95,7 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
     Boolean LOCATION_SELECT = false;
 
     // 수신자 정보
-    String toNickname, toId, toContext, from_id, from_name, inAddress;
+    String toNickname, toId, toContext, from_id, from_name, inAddress, date;
     Double inLongitude, inLatitude;
 
     // SQLite
@@ -116,13 +119,15 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
         ctx = this;
         manager = new DBManager(this);
         writerLayout = (LinearLayout)findViewById(R.id.writerLayout);
-        searchLayout= (LinearLayout)findViewById(R.id.searchLayout);
+        searchLayout = (LinearLayout)findViewById(R.id.searchLayout);
+        titleLayout = (LinearLayout)findViewById(R.id.titleLayout);
         sendBtn = (Button)findViewById(R.id.sendBtn);
         sendBtn.setOnClickListener(this);
         synchBtn = (ImageButton) findViewById(R.id.synchBtn);
         synchBtn.setOnClickListener(this);
         toEt = (EditText) findViewById(R.id.to);
         contextEt = (EditText) findViewById(R.id.contextEt);
+        titleTv= (TextView) findViewById(R.id.titleTv);
 
         // 리스트뷰
         listView = (ListView) findViewById(R.id.listView);
@@ -186,12 +191,17 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
                 GPSGPS();
                 break;
             case R.id.sendBtn: // 서버로 편지내용 전송
+                // 날짜
+                Date d = new Date();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                String date = sdf.format(d).toString();
+                Log.d("letter",  "date : "+date);
                 toContext  = contextEt.getText().toString();
-                Log.d("SUN", "sendLetter : " + from_id+" , " + from_name + " . " + inAddress + "!!");
-                manager.insertData2(new LetterInfo(0, toId, toNickname, toContext, inAddress, inLatitude, inLongitude, 0), ctx);
-                String url = "http://192.168.200.175:8080/letter/insertLetter.do";
-                sendLetter(url, toId, toNickname, from_id, from_name, inAddress, toContext, inLatitude, inLongitude);
-                // 내가 보낸 편지함에 저장
+                Log.d("letter", "sendLetter : " + from_id+" , " + from_name + " . " + inAddress + "!!");
+                manager.insertData2(new LetterInfo(0, toId, toNickname, toContext, inAddress, inLatitude, inLongitude, 0,date), ctx);
+                String url = "http://172.16.101.62:8080/letter/insertLetter.do";
+                sendLetter(url, toId, toNickname, from_id, from_name, inAddress, toContext, inLatitude, inLongitude, date);
+
 
                 break;
 
@@ -425,6 +435,7 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
         return content;
     }
 
+    /* 말풍선 */
     @Override
     public void onCalloutBalloonOfPOIItemTouched(MapView mapView, final MapPOIItem mapPOIItem, MapPOIItem.CalloutBalloonButtonType calloutBalloonButtonType) {
         final Item item = mTagItemMap.get(mapPOIItem.getTag());
@@ -459,16 +470,17 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
                     listView.setVisibility(View.GONE);
                     searchLayout.setVisibility(View.GONE);
                     writerLayout.setVisibility(View.VISIBLE);
+                    titleLayout.setVisibility(View.VISIBLE);
                     //hideSoftKeyboard();
                     if (item.address.equals("")) {
                         MapReverseGeoCoder mReverseGeoCoder = new MapReverseGeoCoder(MapApiConst.DAUM_MAPS_ANDROID_APP_API_KEY, mapPoint, MapActivity.this, MapActivity.this);
                         mReverseGeoCoder.startFindingAddress();
-                    }
-                    else
+                    } else
                         inAddress = item.address;
                     inLatitude = item.latitude;
                     inLongitude = item.longitude;
                     toEt.setText(toNickname);
+                    titleTv.setText("To."+toNickname);
                     Log.d("letter", item.latitude + " " + item.longitude);
                     LOCATION_SELECT = true;
                 }
@@ -484,7 +496,7 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
     }
 
     /************************* http 통신 메소드***********************/
-    public String sendLetter(String strurl, String to_id, String to_name, String from_id, String from_name, String address, String content, double latitude, double longitude)
+    public String sendLetter(String strurl, String to_id, String to_name, String from_id, String from_name, String address, String content, double latitude, double longitude, String date)
     {
         String response_msg =  null;
         try {
@@ -496,6 +508,7 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
             data += "&" + URLEncoder.encode("content", "EUC-KR") + "=" + URLEncoder.encode(""+content, "EUC-KR");
             data += "&" + URLEncoder.encode("latitude", "EUC-KR") + "=" + URLEncoder.encode(""+latitude, "EUC-KR");
             data += "&" + URLEncoder.encode("longitude", "EUC-KR") + "=" + URLEncoder.encode(""+longitude, "EUC-KR");
+            data += "&" + URLEncoder.encode("date", "EUC-KR") + "=" + URLEncoder.encode(""+date, "EUC-KR");
 
             URL url = new URL(strurl);
             URLConnection conn = url.openConnection();

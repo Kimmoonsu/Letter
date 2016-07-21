@@ -37,8 +37,10 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 
 import onepercent.mobile.com.onepercent.Model.User;
 
@@ -121,11 +123,17 @@ public class FaceLogin extends Activity {
                                                         Log.d("letter", "email : " + email);
                                                         Log.d("letter", "gender : " + gender);
                                                         Log.d("letter", "regid : " + regid);
+                                                        Date d = new Date();
+                                                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                                        String date = sdf.format(d).toString();
                                                         User user = User.getInstance();
+                                                        String install_date = user.getInstall_date();
+                                                        user.setInstall_date(install_date.equals("") || install_date.equals(null) ? date : install_date);
                                                         user.setUser_id(id);
                                                         user.setUser_name(name);
-                                                        String url = "http://192.168.200.175:8080/letter/insertUser.do";
-                                                        post_profile(url, id, name);
+                                                        user.setUser_date(date);
+                                                        String url = "http://172.16.101.62:8080/letter/insertUser.do";
+                                                        post_profile(url, id, name, date);
                                                         Intent intent = new Intent(FaceLogin.this, CardActivity.class);
                                                         intent.putExtra("letter_id", "0");
                                                         intent.putExtra("from_id", "");
@@ -136,6 +144,7 @@ public class FaceLogin extends Activity {
                                                         intent.putExtra("latitude", "0.0");
                                                         intent.putExtra("longitude", "0.0");
                                                         intent.putExtra("address", "");
+                                                        intent.putExtra("date", "");
                                                         startActivity(intent);
                                                         finish();
                                                     } catch (JSONException e) {
@@ -298,12 +307,13 @@ public class FaceLogin extends Activity {
     /*********************************************/
 
     /************************* http 통신 메소드***********************/
-    public String post_profile(String strurl, String id, String name)
+    public String post_profile(String strurl, String id, String name, String date)
     {
         String response_msg =  null;
         try {
             String data = URLEncoder.encode("id", "EUC-KR") + "=" + URLEncoder.encode(""+id, "EUC-KR");
             data += "&" + URLEncoder.encode("name", "EUC-KR") + "=" + URLEncoder.encode(""+name, "EUC-KR");
+            data += "&" + URLEncoder.encode("date", "EUC-KR") + "=" + URLEncoder.encode(""+date, "EUC-KR");
             data += "&" + URLEncoder.encode("register_id", "EUC-KR") + "=" + URLEncoder.encode(""+regid, "EUC-KR");
 
             URL url = new URL(strurl);
