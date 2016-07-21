@@ -51,7 +51,7 @@ public class DBManager {
         public void onCreate(SQLiteDatabase arg0) {
             String createSql = "create table " + tableName + " (id text not null, nickname text not null, primary key(id));";
             String createSql1 = "create table " + tableName1 + " (letter_id int not null,send_id text not null, send_name text not null, context text not null, address text not null, latitude double not null, longitude double not null, state int not null ,date text not null ,  primary key(letter_id));";
-            String createSql2 = "create table " + sendTable + " (letter_id integer primary key ,send_id text not null, send_name text not null, context text not null, address text not null, latitude double not null, longitude double not null, state int not null,date text not null);";
+            String createSql2 = "create table " + sendTable + " (letter_id INTEGER primary key  autoincrement, send_id text not null, send_name text not null, context text not null, address text not null, latitude double not null, longitude double not null, state int not null,date text not null);";
 
             arg0.execSQL(createSql);
             arg0.execSQL(createSql1);
@@ -178,6 +178,7 @@ public class DBManager {
         return infos;
     }
 
+
     public int letterSize() {
         String sql = "select * from " + tableName1 + " ;";
         Cursor results = db.rawQuery(sql, null);
@@ -189,30 +190,33 @@ public class DBManager {
     /**************************************** send LetterBox Table **********************************************/
     // 데이터 추가
     public void insertData2(LetterInfo info,Context context) {
-        String sql = "insert into " + sendTable + " values('"+info.send_id+"','"+info.send_name+"','"+info.context+"','"+info.address+"',"+info.latitude+","+info.longitude+","+info.state+",'"+info.date+"');";
-        Log.d("database", "recive sql : " + sql);
+        String sql = "insert into " + sendTable + "(send_id , send_name , context , address , latitude , longitude , state ,date) values('"+info.send_id+"','"+info.send_name+"','"+info.context+"','"+info.address+"',"+info.latitude+","+info.longitude+","+info.state+",'"+info.date+"');";
+        Log.d("database", "send sql : " + sql);
 
         try{
             db.execSQL(sql);
+            Log.d("database", "send inset");
         }catch(Exception e){
+            Log.d("database", e.getMessage());
         }
     }
 
     public ArrayList<LetterInfo> selectAll2() {
         String sql = "select * from " + sendTable + ";";
         Cursor results = db.rawQuery(sql, null);
-
+        Log.d("letter","select all");
         results.moveToFirst();
         ArrayList<LetterInfo> infos = new ArrayList<LetterInfo>();
 
         while (!results.isAfterLast()) {
             LetterInfo info = new LetterInfo(results.getInt(0), results.getString(1),results.getString(2),results.getString(3),results.getString(4),results.getDouble(5),results.getDouble(6),results.getInt(7),results.getString(8));
             infos.add(info);
-            Log.d("letter",results.getInt(0)+results.getString(1)+results.getString(2)+results.getString(3)+results.getString(4)+results.getDouble(5));
+            Log.d("database",results.getInt(0)+results.getString(1)+results.getString(2)+results.getString(3)+results.getString(4)+results.getDouble(5));
             results.moveToNext();
         }
         results.close();
         return infos;
     }
+
 
 }

@@ -428,7 +428,7 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
         Log.d("letter","Item name : "+mapPOIItem.getItemName());
         if(mapPOIItem.getItemName().equals("green") || mapPOIItem.getItemName().equals("red")) //   (읽을 수 있음)
         {
-            Toast.makeText(CardActivity.this, item.send_id+" "+item.send_name+" "+item.address+" "+item.context+" "+item.latitude+" "+item.longitude, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(CardActivity.this, item.send_id+" "+item.send_name+" "+item.address+" "+item.context+" "+item.latitude+" "+item.longitude, Toast.LENGTH_SHORT).show();
             LayoutInflater inflate = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View layout = inflate.inflate(R.layout.letter_templete, null);
 

@@ -57,6 +57,7 @@
         <activity android:name=".SettingActivity" />
         <activity android:name=".MyInformation" />
         <activity android:name=".AddFriendActivity"/>
+        <activity android:name=".LetterListActivity"/>
 
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"

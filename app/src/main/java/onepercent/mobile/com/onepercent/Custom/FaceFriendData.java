@@ -6,6 +6,4 @@ package onepercent.mobile.com.onepercent.Custom;
 public class FaceFriendData {
     int id;
     String name;
-    String phone;
-
 }

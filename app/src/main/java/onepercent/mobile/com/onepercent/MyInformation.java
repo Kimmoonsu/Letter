@@ -35,9 +35,7 @@ public class MyInformation extends Activity {
         BACK1.setOnClickListener(new View.OnClickListener() { // 알림창에서 뒤로가기 버튼 눌렀을때
             @Override
             public void onClick(View v) {
-
                 Intent intent1 = new Intent(getApplicationContext(), SettingActivity.class);
-                Toast.makeText(getApplication(), "사용자정보 에서 뒤로가기", Toast.LENGTH_SHORT).show();
                 startActivity(intent1);
                 finish();
             }

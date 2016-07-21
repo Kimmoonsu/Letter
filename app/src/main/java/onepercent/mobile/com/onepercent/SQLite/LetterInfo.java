@@ -10,7 +10,7 @@ public class LetterInfo {
     public Double longitude;
     public int state;
     public String date;
-
+    public LetterInfo() {}
     public LetterInfo(int letter_id, String send_id,  String send_name, String context, String address,Double latitude,   Double longitude, int state, String date)
     {
         //letter_id,  send_id,   send_name,  context, latitude,    longitude,  state

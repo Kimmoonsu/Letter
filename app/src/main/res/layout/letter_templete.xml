@@ -8,7 +8,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="To. 김문수"
+        android:text="To. "
         android:padding="20dp"
         android:id="@+id/tem_to" />
 
@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:scrollbars="vertical"
-        android:text="이거 잘만들면 좋겠어여 행쇼행쇼!이거 잘만들면 좋겠어여 행쇼행쇼!이거 잘만들면 좋겠어여 행쇼행쇼!이거 잘만들면 좋겠어여 행쇼행쇼!"
+        android:text=""
         android:padding="20dp"
         android:id="@+id/tem_context" />
 
@@ -33,7 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="From. 이선아"
+        android:text="From. "
         android:padding="20dp"
         android:id="@+id/tem_from" />
 

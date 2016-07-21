@@ -45,7 +45,6 @@ public class alarm extends SettingActivity {
 
                if(isChecking==true)//스위치가 꺼졌을때
                {
-                   Toast.makeText(getApplication(), "OFF", Toast.LENGTH_SHORT).show();
                    alarmTV.setText(" 받지 않음"); //text 받음으로 바뀜
                   // Alarmtext.setText("받지 않음"); // activity_main 즉 설정 메인 창에 알림 설정 상태를 받지않음 으로 바꿈
                    p=1; //1 일때 스위치 켜져있는거
@@ -53,7 +52,6 @@ public class alarm extends SettingActivity {
                }
                else if(isChecking==false)//스위치가 켜졌을때
                {
-                   Toast.makeText(getApplication(), "ON", Toast.LENGTH_SHORT).show();
                    alarmTV.setText(" 받음"); //text 받음으로 바뀜
 
                    p=2;//2일때 스위치 꺼져있는거
@@ -77,7 +75,7 @@ public class alarm extends SettingActivity {
             public void onClick(View v) {
 
                 Intent intent1 = new Intent(getApplicationContext(), SettingActivity.class);
-                Toast.makeText(getApplication(), "알람에서 뒤로가기", Toast.LENGTH_SHORT).show();
+
                 intent1.putExtra("P", p);
                 startActivity(intent1);
 

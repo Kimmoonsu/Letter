@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -107,9 +108,7 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_map);
-
         Intent data = getIntent();
         toId = data.getStringExtra("id");
         toNickname = data.getStringExtra("nickname");
@@ -320,7 +319,7 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
         public View getCalloutBalloon(MapPOIItem poiItem) {
             if (poiItem == null) return null;
             Item item = mTagItemMap.get(poiItem.getTag());
-            Log.d("SUN","Balloon Tag() : "+poiItem.getTag());
+            Log.d("letter","Balloon Tag() : "+poiItem.getTag());
             if (item == null) return null;
             ImageView imageViewBadge = (ImageView) mCalloutBalloon.findViewById(R.id.badge);
             TextView textViewTitle = (TextView) mCalloutBalloon.findViewById(R.id.title);
@@ -407,7 +406,6 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
             adapter.addListItem(getResources().getDrawable(R.drawable.map_pin_blue), item.title, item.address, item.longitude, item.latitude);
         }
 
-        //  Log.d("SUN",sb.toString());
         mMapView.moveCamera(CameraUpdateFactory.newMapPointBounds(mapPointBounds));
 
         MapPOIItem[] poiItems = mMapView.getPOIItems();
@@ -453,7 +451,6 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
                     mMapView.removeAllPOIItems(); // 기존 검색 결과 삭제
                     Bitmap letter = BitmapFactory.decodeResource(getResources(), R.drawable.letter);
                     letter = Bitmap.createScaledBitmap(letter, 96, 120, true);
-
                     MapPOIItem poiItem = new MapPOIItem();
                     poiItem.setItemName("send letter");
                     poiItem.setTag(mapPOIItem.getTag());
