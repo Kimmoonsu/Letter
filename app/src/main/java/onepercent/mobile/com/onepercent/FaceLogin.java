@@ -134,19 +134,29 @@ public class FaceLogin extends Activity {
                                                         user.setUser_date(date);
                                                         String url = "http://52.78.88.51:8080/letter/insertUser.do";
                                                         post_profile(url, id, name, date);
-                                                        Intent intent = new Intent(FaceLogin.this, CardActivity.class);
-                                                        intent.putExtra("letter_id", "0");
-                                                        intent.putExtra("from_id", "");
-                                                        intent.putExtra("from_name", "");
-                                                        intent.putExtra("to_id", "");
-                                                        intent.putExtra("to_name", "");
-                                                        intent.putExtra("content", "");
-                                                        intent.putExtra("latitude", "0.0");
-                                                        intent.putExtra("longitude", "0.0");
-                                                        intent.putExtra("address", "");
-                                                        intent.putExtra("date", "");
-                                                        startActivity(intent);
-                                                        finish();
+                                                        boolean tutorial_state = user.getTutorial_State();
+                                                        if (tutorial_state) {
+                                                            Intent intent = new Intent(FaceLogin.this, CardActivity.class);
+                                                            intent.putExtra("letter_id", "0");
+                                                            intent.putExtra("from_id", "");
+                                                            intent.putExtra("from_name", "");
+                                                            intent.putExtra("to_id", "");
+                                                            intent.putExtra("to_name", "");
+                                                            intent.putExtra("content", "");
+                                                            intent.putExtra("latitude", "0.0");
+                                                            intent.putExtra("longitude", "0.0");
+                                                            intent.putExtra("address", "");
+                                                            intent.putExtra("date", "");
+                                                            startActivity(intent);
+                                                            finish();
+                                                        }
+                                                        else {
+                                                            user.setTutorial_state(true);
+                                                            Intent intent = new Intent(FaceLogin.this, TutorialActivity.class);
+                                                            startActivity(intent);
+                                                            finish();
+                                                        }
+
                                                     } catch (JSONException e) {
                                                         // TODO Auto-generated catch block
                                                         e.printStackTrace();

@@ -63,7 +63,7 @@ public class LetterListActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long ids) {
                 LetterInfo itemData_temp = (LetterInfo) adapter.getItem(position);
-                Toast.makeText(ctx, itemData_temp.latitude + "", Toast.LENGTH_SHORT).show();
+
 
             }
         });

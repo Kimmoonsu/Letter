@@ -53,6 +53,7 @@
         </activity>
         <activity android:name=".CardActivity"/>
         <activity android:name=".MapActivity" />
+        <activity android:name=".TutorialActivity" />
         <activity android:name=".alarm" />
         <activity android:name=".SettingActivity" />
         <activity android:name=".MyInformation" />

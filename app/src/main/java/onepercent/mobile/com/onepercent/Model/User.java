@@ -11,6 +11,11 @@ public class User {
     public static User getInstance() { return instance; }
     public User() {}
 
+    // tutorial state
+    private boolean tutorial_state = false;
+    public boolean getTutorial_State() { return tutorial_state; }
+    public void setTutorial_state(boolean tutorial_state) { this.tutorial_state = tutorial_state; }
+
     private String user_id;
     private String user_name;
     private String user_date; // 앱 접속 시각

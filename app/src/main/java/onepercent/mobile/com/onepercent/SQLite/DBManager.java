@@ -57,7 +57,7 @@ public class DBManager {
             arg0.execSQL(createSql1);
             arg0.execSQL(createSql2);
 
-            Toast.makeText(context, "DB is opened", Toast.LENGTH_SHORT).show();
+
         }
 
         @Override

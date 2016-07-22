@@ -69,10 +69,9 @@ public class SettingActivity extends Activity implements View.OnClickListener{
 
                 break;
             case R.id.invite :
-                Toast.makeText(getApplication(), "초대하기", Toast.LENGTH_SHORT).show();
                 Intent msg = new Intent(Intent.ACTION_SEND);
                 msg.setType("text/plain");
-                msg.putExtra(Intent.EXTRA_TEXT, "'CATSUP' 확인 - https://play.google.com/store/apps/details?id=sumus.mobile.newcatsup");
+                msg.putExtra(Intent.EXTRA_TEXT, "'Secretter' 확인 - https://play.google.com/store/apps/details?id=onepercent.mobile.com.onepercent");
                 startActivity(Intent.createChooser(msg, " 초대"));
                 break;
             case R.id.version :

@@ -201,6 +201,7 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
                 manager.insertData2(new LetterInfo(0, toId, toNickname, toContext, inAddress, inLatitude, inLongitude, 0, date), ctx);
                 String url = "http://52.78.88.51:8080/letter/insertLetter.do";
                 sendLetter(url, toId, toNickname, from_id, from_name, inAddress, toContext, inLatitude, inLongitude, date);
+                Toast.makeText(this, "소중한 편지 전달 완료~!", Toast.LENGTH_SHORT).show();
                 for (int i = 0; i < ActivityModel.actList.size(); i++)
                     ActivityModel.actList.get(i).finish();
                 ActivityModel.actList.clear();
