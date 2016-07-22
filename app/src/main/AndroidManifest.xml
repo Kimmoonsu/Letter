@@ -24,7 +24,7 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/secretter"
         android:label="Secretter"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
@@ -43,7 +43,7 @@
         </receiver>
         <service android:name=".GcmIntentService"></service>
         <activity
-            android:name=".FaceLogin"
+            android:name=".Dialog"
             android:label="Secretter" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -58,7 +58,7 @@
         <activity android:name=".MyInformation" />
         <activity android:name=".AddFriendActivity"/>
         <activity android:name=".LetterListActivity"/>
-
+        <activity android:name=".FaceLogin"/>
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
@@ -74,8 +74,6 @@
             android:name="com.kakao.sdk.AppKey"
             android:value="f9768b73e308737fafe2d2a07bf2a976" />
 
-        <activity android:name=".Dialog" >
-        </activity>
         <activity android:name=".FriendActivity" >
         </activity>
     </application>

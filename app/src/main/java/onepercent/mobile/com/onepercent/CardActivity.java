@@ -64,6 +64,11 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
     // back button handler
     private BackPressCloseHandler backPressCloseHandler;
 
+    // gps thread
+    GpsThread gpsThread;
+    Handler mHandler ;
+    int GPS_CONTRLL = 0;
+
     // Main Widget
     Context ctx;
     ImageButton writeBtn, shareBtn, settingBtn, synchBtn, pushBtn;
@@ -97,8 +102,8 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_card);
-
-
+        mHandler   = new Handler();
+        gpsThread = new GpsThread(true);
         letterYellow =  BitmapFactory.decodeResource(getResources(), R.drawable.letter);
         letterYellow = Bitmap.createScaledBitmap(letterYellow, 60, 75, true);
         letterGreen=  BitmapFactory.decodeResource(getResources(), R.drawable.letter1);
@@ -141,11 +146,6 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
 
 //          /* DB  */
         manager = new DBManager(this);
-//        manager.insertData1(new LetterInfo(0, "보내는 id", "보내는사람 이름", "내용", "도봉산역", 37.50451, 127.0447707, 0,"2016-07-21"), ctx);
-//        manager.insertData1(new LetterInfo(1,  "보내는 id", "보내는사람 이름", "내용", "도봉역", 37.6794452,127.0433323, 0,"2016-07-21"), ctx);
-//        manager.insertData1(new LetterInfo(2, "보내는 id", "보내는사람 이름", "내용", "성신여대역", 37.5927242, 127.0143553, 0,"2016-07-21"), ctx);
-//        manager.insertData1(new LetterInfo(3,   "보내는 id",   "보내는사람 이름",  "내용","성신여대" ,37.5913145,127.0199425,  0,"2016-07-21"),ctx);
-
         LETTER_SIZE = manager.letterSize();
         arrayList = manager.selectAll1();
         manager.selectAll2();
@@ -155,6 +155,18 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
     protected void onPause() {
         super.onPause();
         mapViewContainer.removeAllViews();
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        gpsThread.stopThread();
+        gpsThread = null;
+    }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        gpsThread.stopThread();
+        GPS_CONTRLL = 0;
     }
 
     @Override
@@ -271,10 +283,6 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
         if (arrayList.size() > 0)
             arrayList.clear();
         arrayList = manager.selectAll1();
-//        Bitmap letter =  BitmapFactory.decodeResource(getResources(), R.drawable.letter);
-//        letter = Bitmap.createScaledBitmap(letter, 60, 75, true);
-//        Bitmap letter1 =  BitmapFactory.decodeResource(getResources(), R.drawable.letter1);
-//        letter1 = Bitmap.createScaledBitmap(letter1, 60, 75, true);
 
         for (int i = 0; i < LETTER_SIZE; i++)
         {
@@ -333,7 +341,6 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
     public Double getDistance(Double latitude_1, Double longitude_1, Double latitude_2, Double longitude_2)
     {
         Double distance = calDistance(latitude_1, longitude_1, latitude_2, longitude_2);
-        System.out.println("거리: " + distance);
         return distance;
     }
     public static double calDistance(double lat1, double lon1, double lat2, double lon2){
@@ -361,7 +368,8 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
     private static double rad2deg(double rad){
         return (double)(rad * (double)180d / Math.PI);
     }
-    /************************************/
+
+    /********************************************************/
 
 
     @Override
@@ -381,8 +389,16 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
                 startActivity(setintent);
                 break;
             case R.id.synchBtn: // 이부분이 위도경도
-                GPSGPS();
-
+                GPS_CONTRLL = (GPS_CONTRLL+1)%3;
+                if(GPS_CONTRLL==1)
+                    GPSGPS();
+                else if(GPS_CONTRLL==2)
+                {
+                    gpsThread = new GpsThread(true);
+                    gpsThread.start();
+                }
+                else
+                    gpsThread.stopThread();
                 break;
             case R.id.pushBtn:
                 pushBtn.setVisibility(View.INVISIBLE);
@@ -452,8 +468,8 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
             DisplayMetrics dm = getApplicationContext().getResources().getDisplayMetrics();
             int width = dm.widthPixels;
             int height = dm.heightPixels;
-            Log.d("SUN", "width : "+ width);
-            Log.d("SUN", "height : " + height);
+            Log.d("letter", "width : "+ width);
+            Log.d("letter", "height : " + height);
             WindowManager.LayoutParams params = ad.getWindow().getAttributes();
 
             params.width = width/10*9;
@@ -547,7 +563,7 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
         // 전역변수에 선언 된 편지table 내용을 setter
         setLetter(letter_id, to_id, to_name, from_id, from_name, content, latitude, longitude, address, date);
         Log.d("letter", "getter letter table : " + letter_id + " , " + to_id + " , " + to_name + " , " + from_id + ", " + from_name + " , " + content + " , " + latitude + " , " + longitude + ", " + date+", " + address + "!!");
-        println("새로운 메시지가 도착했습니다 : " + data);
+        println("새로운 편지가 도착했습니다 : " + data);
         comparePush();
     }
 
@@ -656,4 +672,35 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
         return response_msg;
     }
 
+
+    // gps Thread class
+    class GpsThread  extends Thread {
+        private int i = 0;
+        private boolean isPlay = false;
+
+        public GpsThread(boolean isPlay){
+            this.isPlay = isPlay;
+        }
+
+        public void stopThread(){
+            isPlay = !isPlay;
+        }
+        @Override
+        public void run() {
+            super.run();
+            while (isPlay) {
+                try { Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        GPSGPS();
+                    }
+                });
+            }
+        }
+    }
 }
