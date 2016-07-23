@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -45,12 +46,15 @@ import onepercent.mobile.com.onepercent.Map.Item;
 import onepercent.mobile.com.onepercent.Map.MapApiConst;
 import onepercent.mobile.com.onepercent.Model.ActivityModel;
 import onepercent.mobile.com.onepercent.Model.BackPressCloseHandler;
-import onepercent.mobile.com.onepercent.Model.User;
 import onepercent.mobile.com.onepercent.SQLite.DBManager;
 import onepercent.mobile.com.onepercent.SQLite.LetterInfo;
 
 
 public class CardActivity extends Activity implements View.OnClickListener, POIItemEventListener {
+    //shared memory
+    SharedPreferences pref;
+    SharedPreferences.Editor editor;
+
     //user
     String user_id, user_name;
 
@@ -96,7 +100,7 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
     DBManager manager;
 
     Bitmap letterYellow, letterRed, letterGreen;
-    User user;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,13 +115,14 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
         letterRed=  BitmapFactory.decodeResource(getResources(), R.drawable.letter2);
         letterRed = Bitmap.createScaledBitmap(letterRed, 60, 75, true);
 
+        getUser();
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-        backPressCloseHandler = new BackPressCloseHandler(this);
-        user = User.getInstance();
-        user_id = user.getUser_id();
-        user_name = user.getUser_name();
+        pref = getSharedPreferences("pref", MODE_PRIVATE);
+        editor = pref.edit();
+        backPressCloseHandler = new BackPressCloseHandler(this, pref, editor);
+
         Log.d("letter", "user_id : " + user_id + " user_name : " + user_name);
         intent = getIntent();
         // data get
@@ -520,7 +525,8 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
         Date d = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String date = sdf.format(d).toString();
-        user.setUser_date(date);
+        editor.putString("access_time", date);
+        editor.commit();
         processIntent(intent);
 
         super.onNewIntent(intent);
@@ -607,7 +613,8 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
         Date d = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String access_date = sdf.format(d).toString();
-        user.setUser_date(access_date);
+        editor.putString("access_time", access_date);
+        editor.commit();
         if (latitude != 0.0) {
             String data = "";
 
@@ -672,6 +679,12 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
         return response_msg;
     }
 
+    // User name, id 불러오기
+    private void getUser(){
+        SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
+        user_name = pref.getString("user_name", "");
+        user_id = pref.getString("user_id", "");
+    }
 
     // gps Thread class
     class GpsThread  extends Thread {

@@ -1,6 +1,7 @@
 package onepercent.mobile.com.onepercent.Model;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -13,14 +14,17 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class BackPressCloseHandler {
-
+    SharedPreferences pref;
+    SharedPreferences.Editor editor;
     private long backKeyPressedTime = 0;
     private Toast toast;
 
     private Activity activity;
 
-    public BackPressCloseHandler(Activity context) {
+    public BackPressCloseHandler(Activity context, SharedPreferences pref, SharedPreferences.Editor editor) {
         this.activity = context;
+        this.pref = pref;
+        this.editor = editor;
     }
 
     public void onBackPressed() {
@@ -33,10 +37,10 @@ public class BackPressCloseHandler {
             Date d = new Date();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String date = sdf.format(d).toString();
-            User user = User.getInstance();
-            user.setClose_date(date);
+            editor.putString("close_time", date);
+            editor.commit();
             String url = "http://52.78.88.51:8080/letter/closeUser.do";
-            sendCloseUser(url, user.getUser_id(), user.getUser_name(), user.getUser_date(), date);
+            sendCloseUser(url, pref.getString("user_id", ""), pref.getString("user_name", ""), pref.getString("access_time", ""), date);
             activity.finish();
             toast.cancel();
         }

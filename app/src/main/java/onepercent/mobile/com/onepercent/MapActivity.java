@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
@@ -57,7 +58,6 @@ import onepercent.mobile.com.onepercent.Map.MapApiConst;
 import onepercent.mobile.com.onepercent.Map.OnFinishSearchListener;
 import onepercent.mobile.com.onepercent.Map.Searcher;
 import onepercent.mobile.com.onepercent.Model.ActivityModel;
-import onepercent.mobile.com.onepercent.Model.User;
 import onepercent.mobile.com.onepercent.SQLite.DBManager;
 import onepercent.mobile.com.onepercent.SQLite.LetterInfo;
 
@@ -112,9 +112,8 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
         Intent data = getIntent();
         toId = data.getStringExtra("id");
         toNickname = data.getStringExtra("nickname");
-        User user = User.getInstance();
-        from_id = user.getUser_id();
-        from_name = user.getUser_name();
+        getUser();
+
 
         ctx = this;
         manager = new DBManager(this);
@@ -553,7 +552,12 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
         Log.d("SUN","ADDRESS : fail");
     }
 
-
+    // User name, id 불러오기
+    private void getUser(){
+        SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
+        from_name = pref.getString("user_name", "");
+        from_id = pref.getString("user_id", "");
+    }
 
     @Override
     @Deprecated

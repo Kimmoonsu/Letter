@@ -1,6 +1,7 @@
 package onepercent.mobile.com.onepercent;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
@@ -22,7 +23,9 @@ import java.net.URLEncoder;
 
 public class Main extends Activity {
     Button btn;
-
+    String id= null;
+    String name;
+    boolean state = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,9 +36,17 @@ public class Main extends Activity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String response_msg = post_jsp("http://117.17.142.139:8080/letter/json.do", "Hello Android & Maven!!", "MoonSu");
-                jsonParserList(response_msg);
-                Log.d("letter", " msg: " + response_msg);
+//                String response_msg = post_jsp("http://117.17.142.139:8080/letter/json.do", "Hello Android & Maven!!", "MoonSu");
+//                jsonParserList(response_msg);
+//                Log.d("letter", " msg: " + response_msg);
+                savePreferences("Welcome to");
+                String msg = getPreferences();
+                Log.d("shared", "msg : " + msg + " id : " + id + " state : " + state + " name : " + name);
+                savePreferences();
+                SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
+                state = pref.getBoolean("state", false);
+
+                Log.d("shared", "msg : " + msg + " id : " + id + " state : " + state + " name : " + pref.getString("name", ""));
             }
         });
     }
@@ -125,5 +136,45 @@ public class Main extends Activity {
             e.printStackTrace();
             return null;
         }
+    }
+
+    // 값 불러오기
+    private String getPreferences(){
+        SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
+        String msg = pref.getString("hi", "");
+        state = pref.getBoolean("state", false);
+        id = pref.getString("adva", "");
+        return msg;
+    }
+
+    // 값 저장하기
+    private void savePreferences(String msg){
+        SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString("hi", msg);
+        editor.putString("id", "kim");
+        editor.commit();
+    }
+    private void savePreferences(){
+        SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putBoolean("state", true);
+        editor.putString("name", "moonsu");
+        editor.commit();
+    }
+    // 값(Key Data) 삭제하기
+    private void removePreferences(){
+        SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.remove("hi");
+        editor.commit();
+    }
+
+    // 값(ALL Data) 삭제하기
+    private void removeAllPreferences(){
+        SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.clear();
+        editor.commit();
     }
 }

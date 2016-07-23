@@ -42,7 +42,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
-import onepercent.mobile.com.onepercent.Model.User;
 
 public class FaceLogin extends Activity {
 
@@ -126,15 +125,11 @@ public class FaceLogin extends Activity {
                                                         Date d = new Date();
                                                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                                                         String date = sdf.format(d).toString();
-                                                        User user = User.getInstance();
-                                                        String install_date = user.getInstall_date();
-                                                        user.setInstall_date(install_date.equals("") || install_date.equals(null) ? date : install_date);
-                                                        user.setUser_id(id);
-                                                        user.setUser_name(name);
-                                                        user.setUser_date(date);
+                                                        savePreferences(id, name, date);
                                                         String url = "http://52.78.88.51:8080/letter/insertUser.do";
                                                         post_profile(url, id, name, date);
-                                                        boolean tutorial_state = user.getTutorial_State();
+                                                        boolean tutorial_state = getTutorialState();
+                                                        Log.d("letter", "tutorial_state : " + tutorial_state);
                                                         if (tutorial_state) {
                                                             Intent intent = new Intent(FaceLogin.this, CardActivity.class);
                                                             intent.putExtra("letter_id", "0");
@@ -151,7 +146,8 @@ public class FaceLogin extends Activity {
                                                             finish();
                                                         }
                                                         else {
-                                                            user.setTutorial_state(true);
+                                                            setTutorialState();
+                                                            Log.d("letter", "change tutorial_state : " + getTutorialState());
                                                             Intent intent = new Intent(FaceLogin.this, TutorialActivity.class);
                                                             startActivity(intent);
                                                             finish();
@@ -356,8 +352,37 @@ public class FaceLogin extends Activity {
         return response_msg;
     }
 
+
+    // 값 저장하기
+    private void savePreferences(String user_id, String user_name, String access_time){
+        SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
+        String install_time = pref.getString("install_time", "");
+        SharedPreferences.Editor editor = pref.edit();
+        if (install_time.equals("") || install_time.equals(null) ) {
+            editor.putString("install_time", access_time);
+        }
+        editor.putString("user_id", user_id);
+        editor.putString("user_name", user_name);
+        editor.putString("access_time", access_time);
+        editor.commit();
+    }
+
+    // getter tutorial state
+    private boolean getTutorialState(){
+        SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
+        return pref.getBoolean("tutorial_state", false);
+    }
+    // setter tutorial state
+    private void setTutorialState() {
+        SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putBoolean("tutorial_state", true);
+        editor.commit();
+    }
+
 }
     /*****************************************************************/
+
 
 
 
