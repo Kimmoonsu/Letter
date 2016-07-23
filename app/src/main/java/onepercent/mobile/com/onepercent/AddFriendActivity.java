@@ -1,20 +1,22 @@
 package onepercent.mobile.com.onepercent;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -37,7 +39,7 @@ import onepercent.mobile.com.onepercent.SQLite.DBManager;
 import onepercent.mobile.com.onepercent.SQLite.FriendAdapter;
 import onepercent.mobile.com.onepercent.SQLite.FriendInfo;
 
-public class AddFriendActivity extends Activity implements  View.OnClickListener, ListView.OnItemClickListener{
+public class AddFriendActivity extends BaseActivity implements  View.OnClickListener, ListView.OnItemClickListener{
     // CustomList
     public ListView listView;
     public final ArrayList<FriendInfo> itemDatas = new ArrayList<FriendInfo>();
@@ -56,6 +58,9 @@ public class AddFriendActivity extends Activity implements  View.OnClickListener
     ImageButton refreshBtn,findBtn;
     EditText wordEt;
 
+    // font
+    Typeface mTypeface = null;
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -67,6 +72,12 @@ public class AddFriendActivity extends Activity implements  View.OnClickListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_friend);
         ctx = this;
+
+        // font
+        if (mTypeface == null) {
+            mTypeface = Typeface.createFromAsset(this.getAssets(), "fonts.ttf"); // 외부폰트 사용
+            // mTypeface = Typeface.MONOSPACE; // 내장 폰트 사용
+        }
 
         // 리스트뷰
         listView = (ListView) findViewById(R.id.friendlistView);
@@ -108,6 +119,24 @@ public class AddFriendActivity extends Activity implements  View.OnClickListener
         });
 
     }
+    // 폰트 적용
+    void setGlobalFont(View view) {
+        if (view != null) {
+            if(view instanceof ViewGroup){
+                ViewGroup vg = (ViewGroup)view;
+                int vgCnt = vg.getChildCount();
+                for(int i=0; i < vgCnt; i++){
+                    View v = vg.getChildAt(i);
+                    if(v instanceof TextView){
+                        ((TextView) v).setTypeface(mTypeface);
+                    }
+
+                    setGlobalFont(v);
+                }
+            }
+        }
+    }
+
 
     void showList() { // 리스트 뿌려주기
         if(adapter.getCount()>0)

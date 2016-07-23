@@ -1,6 +1,7 @@
 package onepercent.mobile.com.onepercent.SQLite;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 import onepercent.mobile.com.onepercent.R;
 
 public class FriendAdapter extends BaseAdapter {
-
+    Typeface mTypeface = null;
     private ArrayList<FriendInfo> itemDatas = null;
     private LayoutInflater layoutInflater = null;
     private Context contexts=null;
@@ -44,7 +45,10 @@ public class FriendAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
+        if (mTypeface == null) {
+            mTypeface = Typeface.createFromAsset(contexts.getAssets(), "fonts.ttf"); // 외부폰트 사용
+            // mTypeface = Typeface.MONOSPACE; // 내장 폰트 사용
+        }
         FriendHolder viewHolder = new FriendHolder();
 
         if(convertView == null){
@@ -53,9 +57,13 @@ public class FriendAdapter extends BaseAdapter {
             viewHolder.id = (TextView)convertView.findViewById(R.id.id_item);
             viewHolder.nickname = (TextView)convertView.findViewById(R.id.nickname_item);
 
+            viewHolder.id.setTypeface(mTypeface);
+            viewHolder.nickname.setTypeface(mTypeface);
+
             convertView.setTag(viewHolder);
         }
         else{
+            setGlobalFont(convertView);
             viewHolder=(FriendHolder)convertView.getTag();
         }
 
@@ -65,6 +73,23 @@ public class FriendAdapter extends BaseAdapter {
         viewHolder.nickname.setText(itemData.nickname);
 
         return convertView;
+    }
+
+    void setGlobalFont(View view) {
+        if (view != null) {
+            if(view instanceof ViewGroup){
+                ViewGroup vg = (ViewGroup)view;
+                int vgCnt = vg.getChildCount();
+                for(int i=0; i < vgCnt; i++){
+                    View v = vg.getChildAt(i);
+                    if(v instanceof TextView){
+                        ((TextView) v).setTypeface(mTypeface);
+                    }
+
+                    setGlobalFont(v);
+                }
+            }
+        }
     }
 
     public void addListItem(String id, String name)

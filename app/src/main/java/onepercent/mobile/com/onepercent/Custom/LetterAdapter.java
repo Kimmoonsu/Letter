@@ -1,6 +1,7 @@
 package onepercent.mobile.com.onepercent.Custom;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +16,7 @@ import onepercent.mobile.com.onepercent.SQLite.LetterInfo;
 
 
 public class LetterAdapter extends BaseAdapter {
-
+    Typeface mTypeface = null;
     private ArrayList<LetterInfo> itemDatas = null;
     private LayoutInflater layoutInflater = null;
     private Context contexts = null;
@@ -48,7 +49,10 @@ public class LetterAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
+        if (mTypeface == null) {
+            mTypeface = Typeface.createFromAsset(contexts.getAssets(), "fonts.ttf"); // 외부폰트 사용
+            // mTypeface = Typeface.MONOSPACE; // 내장 폰트 사용
+        }
         LetterHolder viewHolder = new LetterHolder();
 
         if (convertView == null) {
@@ -61,6 +65,7 @@ public class LetterAdapter extends BaseAdapter {
 
             convertView.setTag(viewHolder);
         } else {
+            setGlobalFont(convertView);
             viewHolder = (LetterHolder) convertView.getTag();
         }
 
@@ -74,6 +79,26 @@ public class LetterAdapter extends BaseAdapter {
 
         return convertView;
     }
+
+
+    void setGlobalFont(View view) {
+        if (view != null) {
+            if(view instanceof ViewGroup){
+                ViewGroup vg = (ViewGroup)view;
+                int vgCnt = vg.getChildCount();
+                for(int i=0; i < vgCnt; i++){
+                    View v = vg.getChildAt(i);
+                    if(v instanceof TextView){
+                        ((TextView) v).setTypeface(mTypeface);
+                    }
+
+                    setGlobalFont(v);
+                }
+            }
+        }
+    }
+
+
 
     public void addListItem(int letter_id, String send_id,  String send_name, String context, String address, Double latitude,   Double longitude, int state, String date) {
 

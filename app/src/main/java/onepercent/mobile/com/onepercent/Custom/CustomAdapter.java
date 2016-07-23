@@ -1,6 +1,7 @@
 package onepercent.mobile.com.onepercent.Custom;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import onepercent.mobile.com.onepercent.R;
 
 public class CustomAdapter extends BaseAdapter {
 
+    Typeface mTypeface = null;
     private ArrayList<ItemData> itemDatas = null;
     private LayoutInflater layoutInflater = null;
     private Context  contexts=null;
@@ -46,7 +48,10 @@ public class CustomAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
+       if (mTypeface == null) {
+            mTypeface = Typeface.createFromAsset(contexts.getAssets(), "fonts.ttf"); // 외부폰트 사용
+            // mTypeface = Typeface.MONOSPACE; // 내장 폰트 사용
+        }
         ViewHolder viewHolder = new ViewHolder();
 
         if(convertView == null){
@@ -58,10 +63,14 @@ public class CustomAdapter extends BaseAdapter {
             viewHolder.longitude = (TextView)convertView.findViewById(R.id.txtLong_item);
             viewHolder.latitude = (TextView)convertView.findViewById(R.id.txtLati_item);
 
+            viewHolder.title.setTypeface(mTypeface);
+            viewHolder.address.setTypeface(mTypeface);
+
             convertView.setTag(viewHolder);
         }
         else{
-            viewHolder=(ViewHolder)convertView.getTag();
+            setGlobalFont(convertView);
+             viewHolder=(ViewHolder)convertView.getTag();
         }
 
         ItemData itemData = itemDatas.get(position);
@@ -74,6 +83,25 @@ public class CustomAdapter extends BaseAdapter {
 
         return convertView;
     }
+
+
+    void setGlobalFont(View view) {
+        if (view != null) {
+            if(view instanceof ViewGroup){
+                ViewGroup vg = (ViewGroup)view;
+                int vgCnt = vg.getChildCount();
+                for(int i=0; i < vgCnt; i++){
+                    View v = vg.getChildAt(i);
+                    if(v instanceof TextView){
+                        ((TextView) v).setTypeface(mTypeface);
+                    }
+
+                    setGlobalFont(v);
+                }
+            }
+        }
+    }
+
 
     public void addListItem(Drawable img,String title,String address,Double longitude, Double lantitude)
     {

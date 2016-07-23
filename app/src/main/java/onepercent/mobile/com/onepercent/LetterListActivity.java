@@ -16,7 +16,7 @@ import onepercent.mobile.com.onepercent.Custom.LetterAdapter;
 import onepercent.mobile.com.onepercent.SQLite.DBManager;
 import onepercent.mobile.com.onepercent.SQLite.LetterInfo;
 
-public class LetterListActivity extends Activity {
+public class LetterListActivity extends BaseActivity {
 
     TextView letterTitle;
 

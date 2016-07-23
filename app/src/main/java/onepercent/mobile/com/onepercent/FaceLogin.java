@@ -43,7 +43,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 
-public class FaceLogin extends Activity {
+public class FaceLogin extends BaseActivity {
 
     private CallbackManager callbackManager                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            ;
     Context mContext;

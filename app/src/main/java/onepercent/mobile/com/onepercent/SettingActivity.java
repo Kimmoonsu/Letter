@@ -10,7 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-public class SettingActivity extends Activity implements View.OnClickListener{
+public class SettingActivity extends BaseActivity implements View.OnClickListener{
     ImageView BACK;
     TextView Alarm,Alarmtext,notice,information1,version1,invite , reciveBox, sendBox, myInformation;
     int PP =2;//2는 알림받는다는 것을 초기화

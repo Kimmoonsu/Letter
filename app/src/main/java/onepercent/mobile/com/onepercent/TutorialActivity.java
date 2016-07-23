@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 
-public class TutorialActivity extends Activity {
+public class TutorialActivity extends BaseActivity {
     ImageView tutorialView;
     int ids[] = {R.drawable.tutorial0, R.drawable.tutorial1, R.drawable.tutorial2, R.drawable.tutorial3, R.drawable.tutorial4};
     int CLICK_COUTN=1;

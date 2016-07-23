@@ -11,7 +11,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 
 
-public class Dialog extends Activity {
+public class Dialog extends BaseActivity {
     DialogThread dialogThread = null;
 
     private boolean dialogState = true;

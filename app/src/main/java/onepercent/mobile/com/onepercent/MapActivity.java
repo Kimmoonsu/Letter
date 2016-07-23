@@ -7,12 +7,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -63,9 +65,9 @@ import onepercent.mobile.com.onepercent.SQLite.LetterInfo;
 
 import static net.daum.mf.map.api.MapReverseGeoCoder.ReverseGeoCodingResultListener;
 
-public class MapActivity extends FragmentActivity implements MapView.MapViewEventListener, MapView.POIItemEventListener, View.OnClickListener, TextView.OnEditorActionListener, ReverseGeoCodingResultListener {
+public class MapActivity extends BaseActivity implements MapView.MapViewEventListener, MapView.POIItemEventListener, View.OnClickListener, TextView.OnEditorActionListener, ReverseGeoCodingResultListener {
     private static final String LOG_TAG = "SearchDemoActivity";
-
+    Typeface mTypeface = null;
 
 
     public static Context ctx;
@@ -115,6 +117,11 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
         getUser();
 
 
+        // font
+        if (mTypeface == null) {
+            mTypeface = Typeface.createFromAsset(this.getAssets(), "fonts.ttf"); // 외부폰트 사용
+            // mTypeface = Typeface.MONOSPACE; // 내장 폰트 사용
+        }
         ctx = this;
         manager = new DBManager(this);
         writerLayout = (LinearLayout)findViewById(R.id.writerLayout);
@@ -440,14 +447,23 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
     @Override
     public void onCalloutBalloonOfPOIItemTouched(MapView mapView, final MapPOIItem mapPOIItem, MapPOIItem.CalloutBalloonButtonType calloutBalloonButtonType) {
         final Item item = mTagItemMap.get(mapPOIItem.getTag());
-        Log.d("SUN", "TAG() : "+mapPOIItem.getTag());
+
         if(LOCATION_SELECT==false) {
-            AlertDialog.Builder ab = new AlertDialog.Builder(ctx);
-            ab.setTitle("Location");
-            ab.setMessage("이 장소로 선택하시겠습니까?");
-            ab.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+            LayoutInflater inflate = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View layout = inflate.inflate(R.layout.dialog_popop, null);
+            setGlobalFont(layout);
+
+            AlertDialog.Builder aDialog = new AlertDialog.Builder(ctx);
+            aDialog.setView(layout);
+            final AlertDialog ad = aDialog.create();
+            ad.show();
+
+            Button dialog_cancle = (Button) layout.findViewById(R.id.dialog_cancle);
+            Button dialog_ok = (Button)layout.findViewById(R.id.dialog_ok);
+
+            dialog_ok.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
+                public void onClick(View view) {
                     mMapView.removeAllPOIItems(); // 기존 검색 결과 삭제
                     Bitmap letter = BitmapFactory.decodeResource(getResources(), R.drawable.letter);
                     letter = Bitmap.createScaledBitmap(letter, 96, 120, true);
@@ -480,18 +496,35 @@ public class MapActivity extends FragmentActivity implements MapView.MapViewEven
                     inLatitude = item.latitude;
                     inLongitude = item.longitude;
                     toEt.setText(toNickname);
-                    titleTv.setText("To."+toNickname);
+                    titleTv.setText("To." + toNickname);
                     Log.d("letter", item.latitude + " " + item.longitude);
                     LOCATION_SELECT = true;
                 }
             });
-            ab.setNegativeButton("cancle", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
 
+            dialog_cancle.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ad.cancel();
                 }
             });
-            ab.show();
+
+        }
+    }
+
+    private void setGlobalFont(View view) {
+        if (view != null) {
+            if(view instanceof ViewGroup){
+                ViewGroup vg = (ViewGroup)view;
+                int vgCnt = vg.getChildCount();
+                for(int i=0; i < vgCnt; i++){
+                    View v = vg.getChildAt(i);
+                    if(v instanceof TextView){
+                        ((TextView) v).setTypeface(mTypeface);
+                    }
+                    setGlobalFont(v);
+                }
+            }
         }
     }
 

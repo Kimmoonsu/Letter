@@ -18,7 +18,7 @@ import onepercent.mobile.com.onepercent.SQLite.DBManager;
 import onepercent.mobile.com.onepercent.SQLite.FriendAdapter;
 import onepercent.mobile.com.onepercent.SQLite.FriendInfo;
 
-public class FriendActivity extends Activity implements  View.OnClickListener{
+public class FriendActivity extends BaseActivity implements  View.OnClickListener{
 
     // CustomList
     public ListView listView;

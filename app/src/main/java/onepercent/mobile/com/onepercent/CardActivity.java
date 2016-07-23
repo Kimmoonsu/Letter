@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
@@ -50,10 +51,13 @@ import onepercent.mobile.com.onepercent.SQLite.DBManager;
 import onepercent.mobile.com.onepercent.SQLite.LetterInfo;
 
 
-public class CardActivity extends Activity implements View.OnClickListener, POIItemEventListener {
+public class CardActivity extends BaseActivity implements View.OnClickListener, POIItemEventListener {
     //shared memory
     SharedPreferences pref;
     SharedPreferences.Editor editor;
+
+    // font
+    Typeface mTypeface = null;
 
     //user
     String user_id, user_name;
@@ -106,6 +110,12 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_card);
+
+        // font
+        if (mTypeface == null) {
+            mTypeface = Typeface.createFromAsset(this.getAssets(), "fonts.ttf"); // 외부폰트 사용
+        }
+
         mHandler   = new Handler();
         gpsThread = new GpsThread(true);
         letterYellow =  BitmapFactory.decodeResource(getResources(), R.drawable.letter);
@@ -418,6 +428,7 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
 
         public CustomCalloutBalloonAdapter() {
             mCalloutBalloon = getLayoutInflater().inflate(R.layout.custom_balloon, null);
+            setGlobalFont(mCalloutBalloon);
         }
 
         @Override
@@ -439,46 +450,47 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
 
     }
 
+
     /* 말풍선 클릭*/
     @Override
     public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem, MapPOIItem.CalloutBalloonButtonType calloutBalloonButtonType) {
         final Item item = mTagItemMap.get(mapPOIItem.getTag());
 
         LetterInfo letters = manager.dataGet(item.letter_id);
+        LayoutInflater inflate = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View layout = inflate.inflate(R.layout.letter_templete, null);
+        setGlobalFont(layout);
 
-        Log.d("letter","Item name : "+mapPOIItem.getItemName());
-        if(mapPOIItem.getItemName().equals("green") || mapPOIItem.getItemName().equals("red")) //   (읽을 수 있음)
+        TextView tem_to = (TextView) layout.findViewById(R.id.tem_to);
+        TextView tem_context = (TextView) layout.findViewById(R.id.tem_context);
+        TextView tem_date = (TextView) layout.findViewById(R.id.tem_date);
+        TextView tem_from = (TextView) layout.findViewById(R.id.tem_from);
+        Button tem_close = (Button) layout.findViewById(R.id.tem_close);
+
+        AlertDialog.Builder aDialog = new AlertDialog.Builder(ctx);
+
+        aDialog.setView(layout);
+        final AlertDialog ad = aDialog.create();
+
+        DisplayMetrics dm = getApplicationContext().getResources().getDisplayMetrics();
+        int width = dm.widthPixels;
+        int height = dm.heightPixels;
+        WindowManager.LayoutParams params = ad.getWindow().getAttributes();
+
+
+        // AlertDialog 에서 위치 크기 수정
+
+
+        if (mapPOIItem.getItemName().equals("green") || mapPOIItem.getItemName().equals("red")) //   (읽을 수 있음)
         {
-            //Toast.makeText(CardActivity.this, item.send_id+" "+item.send_name+" "+item.address+" "+item.context+" "+item.latitude+" "+item.longitude, Toast.LENGTH_SHORT).show();
-            LayoutInflater inflate = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View layout = inflate.inflate(R.layout.letter_templete, null);
-
-            TextView tem_to = (TextView) layout.findViewById(R.id.tem_to);
-            TextView tem_context = (TextView) layout.findViewById(R.id.tem_context);
-            TextView tem_date = (TextView) layout.findViewById(R.id.tem_date);
-            TextView tem_from = (TextView) layout.findViewById(R.id.tem_from);
-            Button tem_close = (Button) layout.findViewById(R.id.tem_close);
-
             tem_to.setText("To. " + user_name);
             tem_context.setText(letters.context);
             tem_date.setText(letters.date);
             tem_from.setText("From. " + item.send_name);
 
-            AlertDialog.Builder aDialog = new AlertDialog.Builder(ctx);
-            aDialog.setView(layout);
-            final AlertDialog ad = aDialog.create();
             ad.show();
-
-            // AlertDialog 에서 위치 크기 수정
-            DisplayMetrics dm = getApplicationContext().getResources().getDisplayMetrics();
-            int width = dm.widthPixels;
-            int height = dm.heightPixels;
-            Log.d("letter", "width : "+ width);
-            Log.d("letter", "height : " + height);
-            WindowManager.LayoutParams params = ad.getWindow().getAttributes();
-
-            params.width = width/10*9;
-            params.height = height/10*9;
+            params.width = width / 10 * 9;
+            params.height = height / 10 * 9;
             ad.getWindow().setAttributes(params);
 
             tem_close.setOnClickListener(new View.OnClickListener() {
@@ -491,17 +503,28 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
                 }
             });
 
-        }
-        else if(mapPOIItem.getItemName().equals("yellow")){ //   (읽을 수 없음)
-            AlertDialog.Builder ab = new AlertDialog.Builder(ctx);
-            ab.setTitle("읽을 수 없습니다.");
-            ab.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+        } else if (mapPOIItem.getItemName().equals("yellow")) { //   (읽을 수 없음)
+
+            tem_context.setHeight(100);
+            tem_to.setVisibility(View.GONE);
+            tem_context.setText("\"읽을 수 없습니다\" \n편지 근처라면 동기화를 해주세요!");
+            tem_date.setVisibility(View.GONE);
+            tem_from.setVisibility(View.GONE);
+
+            ad.show();
+
+
+            params.width = width / 10 * 9;
+            ad.getWindow().setAttributes(params);
+
+            //params.height = height/10*9;
+
+            tem_close.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    // Toast.makeText(CardActivity.this, item.send_id+" "+item.send_name+" "+item.address+" "+item.context+" "+item.latitude+" "+item.longitude, Toast.LENGTH_SHORT).show();
+                public void onClick(View view) {
+                    ad.cancel();
                 }
             });
-            ab.show();
         }
 
 
@@ -636,7 +659,7 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
         manager = new DBManager(this);
         // 임시 데이터 삽입
         //manager.insertData1(new LetterInfo(0, "보내는 id", "보내는사람 이름", "내용", "도봉산역", 37.6896072, 127.0441583, 0,"2016-07-21"), ctx);
-        manager.insertData1(new LetterInfo(letter_id,  from_id, from_name, content, address, latitude , longitude, 0, date),ctx);
+        manager.insertData1(new LetterInfo(letter_id, from_id, from_name, content, address, latitude , longitude, 0, date),ctx);
         LETTER_SIZE = manager.letterSize();
         arrayList = manager.selectAll1();
         manager.selectAll2();
@@ -685,6 +708,25 @@ public class CardActivity extends Activity implements View.OnClickListener, POII
         user_name = pref.getString("user_name", "");
         user_id = pref.getString("user_id", "");
     }
+
+    // 폰트 적용
+    void setGlobalFont(View view) {
+        if (view != null) {
+            if(view instanceof ViewGroup){
+                ViewGroup vg = (ViewGroup)view;
+                int vgCnt = vg.getChildCount();
+                for(int i=0; i < vgCnt; i++){
+                    View v = vg.getChildAt(i);
+                    if(v instanceof TextView){
+                        ((TextView) v).setTypeface(mTypeface);
+                    }
+
+                    setGlobalFont(v);
+                }
+            }
+        }
+    }
+
 
     // gps Thread class
     class GpsThread  extends Thread {

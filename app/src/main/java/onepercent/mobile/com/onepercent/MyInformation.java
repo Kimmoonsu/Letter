@@ -10,7 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-public class MyInformation extends Activity {
+public class MyInformation extends BaseActivity {
 
     TextView alarmTV, Alarmtext;
     TextView installtime, closetime, accesstime;
